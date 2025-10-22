@@ -8,7 +8,7 @@ WORKDIR /ecom
 
 # Copy project files
 COPY pom.xml .
-COPY src ./src
+COPY src ecom/src
 
 # Build the project (skip tests for faster builds)
 RUN mvn clean package -DskipTests
