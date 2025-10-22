@@ -1,31 +1,31 @@
 # ============================
 # Stage 1: Build the application
 # ============================
-FROM maven:3.5.4-eclipse-temurin-21-alpine AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy Maven project files
+# Copy project files
 COPY pom.xml .
 COPY src ./src
 
-# Build the project without running tests
+# Build the project (skip tests for faster builds)
 RUN mvn clean package -DskipTests
 
 # ============================
 # Stage 2: Run the application
 # ============================
-FROM eclipse-temurin:21-alpine
+FROM eclipse-temurin:21
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
 # Copy the built JAR file from the builder stage
 COPY --from=builder /app/target/ecom-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose the port the app listens on
+# Expose port (Spring Boot default)
 EXPOSE 8080
 
-# Define the entrypoint to run the application
+# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
