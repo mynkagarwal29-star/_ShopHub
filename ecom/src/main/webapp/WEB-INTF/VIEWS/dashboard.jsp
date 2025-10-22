@@ -146,11 +146,11 @@
     <!-- Settings buttons -->
     <div class="mt-auto pb-3 px-3">
       <button class="btn btn-warning w-100 mb-2 rounded-pill shadow-sm d-flex align-items-center justify-content-center"
-              data-bs-toggle="modal" data-bs-target="#editEmailModal">
+              data-bs-toggle="modal" data-bs-target="#editEmailModal#">
         <i class="fas fa-envelope-open me-2"></i>Edit Email
       </button>
       <button class="btn btn-warning w-100 rounded-pill shadow-sm d-flex align-items-center justify-content-center"
-              data-bs-toggle="modal" data-bs-target="#resetModal">
+              data-bs-toggle="modal" data-bs-target="#resetModal#">
         <i class="fas fa-key me-2"></i>Edit Password
       </button>
     </div>
