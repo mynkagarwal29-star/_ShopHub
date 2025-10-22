@@ -4,11 +4,9 @@
 FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 # Set working directory
-WORKDIR /ecom
-
-# Copy project files
-COPY ecom/pom.xml .
-COPY src ecom/src
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
 
 # Build the project (skip tests for faster builds)
 RUN mvn clean package -DskipTests
