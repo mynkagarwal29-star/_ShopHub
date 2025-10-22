@@ -7,7 +7,7 @@ FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /ecom
 
 # Copy project files
-COPY pom.xml .
+COPY ecom/pom.xml .
 COPY src ecom/src
 
 # Build the project (skip tests for faster builds)
