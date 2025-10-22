@@ -4,7 +4,7 @@
 FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 # Set working directory
-WORKDIR /app
+WORKDIR /ecom
 
 # Copy project files
 COPY pom.xml .
@@ -25,7 +25,7 @@ WORKDIR /app
 COPY --from=builder /app/target/ecom-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose port (Spring Boot default)
-EXPOSE 8080
+EXPOSE 8090
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
