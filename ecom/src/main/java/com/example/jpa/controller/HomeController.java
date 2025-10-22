@@ -26,7 +26,7 @@ public class HomeController {
     @Autowired
     ProductDao pd;
     
-    @GetMapping("/")
+    @GetMapping("ecom-shophub.onrender.com")
     public String home(Model model, HttpSession session) {
         try {
             // Clear any problematic session attributes
