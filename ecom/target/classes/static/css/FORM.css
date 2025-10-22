@@ -1,0 +1,209 @@
+@charset "UTF-8";
+/* Form-specific inline styles */
+:root {
+    --primary: #4e73df;
+    --secondary: #858796;
+    --success: #1cc88a;
+    --info: #36b9cc;
+    --warning: #f6c23e;
+    --danger: #e74a3b;
+    --light: #f8f9fc;
+    --dark: #5a5c69;
+}
+
+html, body {
+    height: 100%;
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--dark);
+    background-color: #f5f5f5;
+}
+
+.container-fluid {
+    min-height: 100vh;
+}
+
+.sidebar {
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: linear-gradient(180deg, var(--primary) 10%, #2e59d9 100%) !important;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500;
+    margin: 5px 15px;
+    padding: 10px 15px !important;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+}
+
+.main-content {
+    min-height: 100vh;
+    padding-bottom: 30px;
+}
+
+.form-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.form-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.form-title {
+    color: var(--primary);
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--light);
+    font-weight: 700;
+    font-size: 1.8rem;
+    position: relative;
+}
+
+.form-title:after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 80px;
+    height: 2px;
+    background-color: var(--primary);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 1px solid #e3e6f0;
+    padding: 12px 15px;
+    transition: all 0.3s ease-in-out;
+    background-color: var(--light);
+    font-size: 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    background-color: white;
+}
+
+.form-row {
+    margin-bottom: 25px;
+}
+
+.image-preview {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 10px;
+    margin-top: 15px;
+    display: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: 3px solid var(--light);
+}
+
+.required::after {
+    content: " *";
+    color: var(--danger);
+    font-weight: bold;
+}
+
+.btn-submit {
+    background: var(--primary);
+    border: none;
+    padding: 12px 30px;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease-in-out;
+    color: white;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
+}
+
+.btn-submit:hover {
+    background: #2e59d9;
+    transform: translateY(-3px);
+    box-shadow: 0 7px 20px rgba(78, 115, 223, 0.4);
+}
+
+.btn-outline-secondary {
+    border-radius: 50px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+    border: 2px solid var(--secondary);
+    color: var(--secondary);
+    background: transparent;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--secondary);
+    color: white;
+    transform: translateY(-3px);
+}
+
+/* Form feedback messages */
+.form-message {
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.form-message.success {
+    background-color: rgba(28, 200, 138, 0.1);
+    border-left: 4px solid var(--success);
+    color: var(--success);
+}
+
+.form-message.error {
+    background-color: rgba(231, 74, 59, 0.1);
+    border-left: 4px solid var(--danger);
+    color: var(--danger);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-container {
+        margin: 20px 15px;
+        padding: 20px;
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+    }
+    
+    .btn-submit, .btn-outline-secondary {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
