@@ -1,7 +1,7 @@
 # ============================
 # Stage 1: Build the application
 # ============================
-FROM maven:3.9.1-eclipse-temurin-21-alpine AS builder
+FROM maven:3.5.4-eclipse-temurin-21-alpine AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
