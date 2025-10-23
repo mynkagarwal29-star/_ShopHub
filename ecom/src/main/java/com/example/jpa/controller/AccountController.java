@@ -67,13 +67,12 @@ public class AccountController {
         Account account = accDao.findById(currentUser.getId())
                 .orElse(currentUser);
 
-        List<Order> orders = orderDao.findByAccount(account);
+        List<Order> orders = orderDao.findOrdersWithItems(account);
 
         List<Order> recentOrders = orders.stream()
                 .sorted((o1, o2) -> o2.getOrderDate().compareTo(o1.getOrderDate()))
                 .toList();
 
-        // Get user feedbacks
         List<Feedback> userFeedbacks = feedbackService.getFeedbacksByUserId(currentUser.getId());
 
         model.addAttribute("account", account);
