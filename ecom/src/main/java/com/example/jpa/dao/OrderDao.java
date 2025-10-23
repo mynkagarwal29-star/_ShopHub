@@ -14,8 +14,11 @@ public interface OrderDao extends JpaRepository<Order, Long> {
 
 	List<Order> findByAccountId(long id);
 	List<Order> findByAccountAndStatus(Account account, String status);
-	 @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items WHERE o.account = :account")
-	    List<Order> findOrdersWithItems(@Param("account") Account account);
+	@Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items WHERE o.account = :account")
+	List<Order> findOrdersWithItems(@Param("account") Account account);
+	@Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH o.account")
+	List<Order> findAllWithItems();
+
 	Optional<Order> findByRazorpayPaymentId(String razorpayPaymentId);
 	List<Order> findByAccount(Account account);
 	int countByAccount_Id(long id);

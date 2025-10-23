@@ -24,6 +24,7 @@ import com.example.jpa.service.PaymentService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 
 @Controller
 public class OrderController {
@@ -154,20 +155,23 @@ public class OrderController {
         return "orderconfirm"; // your JSP page name
     }
     
+    @Transactional
     @GetMapping("AdminSideOrder")
     public String orders_recieved(
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) String userName,
             @RequestParam(required = false) String status,
-            Model model,HttpSession session) {
+            Model model, HttpSession session) {
 
-    	 Account user = (Account) session.getAttribute("currentUser");
-         if (user == null) {
-             return "redirect:/log";
-         }
-        List<Order> orders = orderDao.findAll();
+        Account user = (Account) session.getAttribute("currentUser");
+        if (user == null) {
+            return "redirect:/log";
+        }
 
-        // Apply filters if provided
+        // Fetch with items eagerly
+        List<Order> orders = orderDao.findAllWithItems();
+
+        // Apply filters in memory
         if (userId != null) {
             orders = orders.stream()
                     .filter(order -> order.getAccount().getId() == userId)
@@ -189,7 +193,6 @@ public class OrderController {
 
         model.addAttribute("data", orders);
 
-        // --- Order counts by status ---
         long totalOrders = orders.size();
         long confirmedOrders = orders.stream()
                 .filter(o -> "CONFIRMED".equalsIgnoreCase(o.getDelivery_status()))
@@ -208,8 +211,6 @@ public class OrderController {
                              "FAILED".equalsIgnoreCase(o.getDelivery_status()))
                 .count();
 
-        
-        // --- Add all attributes for JSP ---
         model.addAttribute("totalOrders", totalOrders);
         model.addAttribute("confirmedOrders", confirmedOrders);
         model.addAttribute("packedOrders", packedOrders);
@@ -217,9 +218,9 @@ public class OrderController {
         model.addAttribute("completedOrders", completedOrders);
         model.addAttribute("cancelledOrders", cancelledOrders);
 
-        // Return view
         return "admin_order";
     }
+
 
     
     @PostMapping("/updateDeliveryStatus")
