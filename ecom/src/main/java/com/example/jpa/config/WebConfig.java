@@ -1,4 +1,4 @@
-package com.example.jpa.config;
+/*package com.example.jpa.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -13,3 +13,4 @@ public class WebConfig implements WebMvcConfigurer {
 	                .addResourceLocations("file:uploads/");
 	    }
 }
+*/
