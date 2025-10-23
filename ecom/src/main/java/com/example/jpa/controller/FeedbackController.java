@@ -61,7 +61,7 @@ public class FeedbackController {
             }
         }
 
-        return "redirect:/order/orderconfirm?orderId=" + orderId;
+        return "redirect:/order/details?id=" + orderId;
     }
 
     /* Admin feedback page
