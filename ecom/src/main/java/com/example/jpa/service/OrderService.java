@@ -115,6 +115,10 @@ public class OrderService {
 
         return order;
     }
+    @Transactional(readOnly = true)
+    public Order getOrderWithItems(Long id) {
+        return orderDao.findByIdWithItems(id);
+    }
 
     /**
      * Save or update an order.

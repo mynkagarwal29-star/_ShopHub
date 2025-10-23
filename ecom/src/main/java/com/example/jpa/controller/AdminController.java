@@ -150,44 +150,48 @@ public class AdminController {
     }
 
     @GetMapping("/viewOrder/{id}")
-    public String OD(@PathVariable Long id, Model model,
-    		 @RequestParam(required = false) String userId,
-             @RequestParam(required = false) String userName,
-             @RequestParam(required = false) String status,RedirectAttributes redirectAttributes) {
-        Order order = orderService.getOrderById(id);
-     // Preserve filters on redirect
-        if (userId != null && !userId.isEmpty()) {
-            redirectAttributes.addAttribute("userId", userId);
+    public String viewOrder(
+            @PathVariable Long id,
+            Model model,
+            @RequestParam(required = false) String userId,
+            @RequestParam(required = false) String userName,
+            @RequestParam(required = false) String status,
+            RedirectAttributes redirectAttributes) {
+
+        Order order = orderService.getOrderWithItems(id); // <-- FIXED
+
+        if (order == null) {
+            redirectAttributes.addFlashAttribute("error", "Order not found.");
+            return "redirect:/admin/orders";
         }
-        if (userName != null && !userName.isEmpty()) {
-            redirectAttributes.addAttribute("userName", userName);
-        }
-        if (status != null && !status.isEmpty()) {
-            redirectAttributes.addAttribute("status", status);
-        }
-        // Get items from the order
-        List<OrderItem> orderItems = order.getItems();
-        int x = orderItems.size();
+
+        // Preserve filters
+        if (userId != null && !userId.isEmpty()) redirectAttributes.addAttribute("userId", userId);
+        if (userName != null && !userName.isEmpty()) redirectAttributes.addAttribute("userName", userName);
+        if (status != null && !status.isEmpty()) redirectAttributes.addAttribute("status", status);
+
         model.addAttribute("order", order);
-        model.addAttribute("orderSize", x);
-        model.addAttribute("orderItems", orderItems);
+        model.addAttribute("orderItems", order.getItems());
+        model.addAttribute("orderSize", order.getItems().size());
 
-        return "admin_order_detail"; // JSP page name
+        return "admin_order_detail";
     }
-    @PostMapping("instantdetail")
-    public String Instantdetail(@RequestParam Long orderId,
-    		Model model) {
-    	
-    	Order order = orderService.getOrderById(orderId);
 
-        // Get items from the order
-        List<OrderItem> orderItems = order.getItems();
-        int x = orderItems.size();
+    @PostMapping("/instantdetail")
+    public String instantDetail(@RequestParam Long orderId, Model model) {
+        Order order = orderService.getOrderWithItems(orderId); // <-- FIXED
+
+        if (order == null) {
+            model.addAttribute("error", "Order not found");
+            return "admin_order_detail";
+        }
+
         model.addAttribute("order", order);
-        model.addAttribute("orderSize", x);
-        model.addAttribute("orderItems", orderItems);
+        model.addAttribute("orderItems", order.getItems());
+        model.addAttribute("orderSize", order.getItems().size());
 
-    return "admin_order_detail";
+        return "admin_order_detail";
     }
+
 }
     

@@ -14,6 +14,9 @@ public interface OrderDao extends JpaRepository<Order, Long> {
 
 	List<Order> findByAccountId(long id);
 	List<Order> findByAccountAndStatus(Account account, String status);
+	@Query("SELECT o FROM Order o LEFT JOIN FETCH o.items WHERE o.id = :id")
+	Order findByIdWithItems(@Param("id") Long id);
+
 	@Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items WHERE o.account = :account")
 	List<Order> findOrdersWithItems(@Param("account") Account account);
 	@Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH o.account")

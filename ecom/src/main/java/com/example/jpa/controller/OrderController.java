@@ -1,6 +1,7 @@
 package com.example.jpa.controller;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -136,24 +137,26 @@ public class OrderController {
 
     @GetMapping("/order/details")
     public String orderDetails(@RequestParam("id") Long orderId, Model model, HttpSession session) {
-        // Updated to use currentUser instead of accdata
         Account user = (Account) session.getAttribute("currentUser");
         if (user == null) {
-            return "redirect:/log"; // Redirect if not logged in
+            return "redirect:/log"; // not logged in
         }
 
-        Order order = orderService.getOrderById(orderId);
-        if (order == null || order.getAccount().getId() != user.getId()) {
-            // Order not found or does not belong to logged-in user
-            return "redirect:/"; // or an error page
+        Order order = orderService.getOrderWithItems(orderId); // <-- FIXED
+        if (order == null || order.getAccount() == null || !Objects.equals(order.getAccount().getId(), user.getId())) {
+            return "redirect:/"; // invalid access
         }
-        boolean feedbackExists = feedbackService.feedbackExistsForOrder(orderId, order.getAccount().getId());
+
+
+        boolean feedbackExists = feedbackService.feedbackExistsForOrder(orderId, user.getId());
         model.addAttribute("feedbackExists", feedbackExists);
-        
         model.addAttribute("order", order);
-        
-        return "orderconfirm"; // your JSP page name
+        model.addAttribute("orderItems", order.getItems());
+        model.addAttribute("orderSize", order.getItems().size());
+
+        return "orderconfirm"; // JSP
     }
+
     
     @Transactional
     @GetMapping("AdminSideOrder")
