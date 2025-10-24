@@ -3,8 +3,15 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.example.jpa.model.Feedback" %>
+<%@ page import="com.example.jpa.model.Account" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%
+		String contextPath = request.getContextPath();
+		Account currentUser = (Account) session.getAttribute("currentUser");
+		if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
+		    response.sendRedirect("/log");
+		    return;
+		}
     List<Feedback> feedbackList = (List <Feedback>) request.getAttribute("feedbackList");
     Integer totalReviews = (Integer) request.getAttribute("totalReviews");
     Double avgRating = (Double) request.getAttribute("avgRating");
@@ -196,7 +203,7 @@
         .cardbox .card .numbers {
             font-size: 1.75rem;
             font-weight: bold;
-            color: var(--primary);
+            color: #fff;
             margin-bottom: 5px;
         }
         .cardbox .card .cardName {
@@ -242,7 +249,7 @@
         }
         /* Star Rating */
         .rating {
-            color: var(--warning);
+            color: #f6c23e;
         }
         /* Feedback Message */
         .feedback-message {
@@ -276,17 +283,6 @@
         }
         .cardbox .card.bg-danger {
             border-left: 4px solid #e74a3b;
-        }
-
-        /* Adjust card colors based on value */
-        .cardbox .card .numbers {
-            font-size: 1.75rem;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 5px;
-        }
-        .rating {
-            color: #f6c23e; /* Gold color for stars */
         }
 
         /* Modal styles */
@@ -375,6 +371,20 @@
             <!-- Main Content -->
             <div class="col-md-10 main-content">
                 <!-- Topbar -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <button class="btn btn-link d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div>
+                        <a class="navbar-brand" href="#">
+                            <i class="fas fa-shopping-bag me-2"></i>ShopHub
+                        </a>
+                    </div>
+                    <!-- User Info Section (Logged In As) -->
+                    <div class="d-flex align-items-center">
+                        <span class="me-3">Logged in as: <strong><%= currentUser.getEmail() %></strong></span>
+                    </div>
+                </div>
                 <div class="topbar d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
                         <h4 class="mb-0">View Feedback</h4>
@@ -422,6 +432,20 @@
                             </div>
                         </div>
                     </div>
+                    <!-- New Card for Developer Contact -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card cardbox bg-info text-white">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="numbers">Always Here for New Features!</div>
+                                    <div class="cardName">Contact Developer</div>
+                                </div>
+                                <div class="iconbox">
+                                    <i class="bi bi-person-check"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!-- Feedback Table -->
                 <div class="card">
@@ -430,7 +454,7 @@
                         <div class="d-flex">
                             <!-- Feedback Rating Filter -->
                         <select class="form-select me-2" style="width: auto;" id="ratingFilter">
-                            <option value="all">All Ratings</option>
+                            <option value="all">Filter</option>
                             <option value="5">5 Stars</option>
                             <option value="4">4 Stars</option>
                             <option value="3">3 Stars</option>
@@ -468,11 +492,24 @@
                                             
                                             // Order ID
                                             String orderId = "Order #" + feedback.getOrder().getId();
+                                            
+                                            // Safely get status
+                                            String status = "Unknown";
+                                            if (feedback.getOrder() != null && feedback.getOrder().getDelivery_status() != null) {
+                                                status = feedback.getOrder().getDelivery_status();
+                                            }
                                     %>
                                         <tr data-rating="<%= feedback.getRating() %>">
                                             <td><%= feedbackId %></td>
                                             <td><%= customerName %></td>
-                                            <td><%= orderId %></td>
+                                            <td><% if (feedback.getOrder() != null) { %>
+                                                    <a href="AdminSideOrder?userId=<%= feedback.getOrder().getAccount().getId() %>&userName=<%= java.net.URLEncoder.encode(feedback.getOrder().getAccount().getName(), "UTF-8") %>" 
+                                                       style="color: #007bff; text-decoration: none; font-weight: bold; padding: 5px 10px; border: 1px solid #007bff; border-radius: 4px; display: inline-block;">
+                                                        <%= orderId %>
+                                                    </a>
+                                                <% } else { %>
+                                                    <%= orderId %>
+                                                <% } %></td>
                                             <td>
                                                 <div class="rating">
                                                     <% for (int i = 1; i <= 5; i++) { %>
@@ -482,7 +519,7 @@
                                             </td>
                                             <td class="feedback-message"><%= feedback.getComment() %></td>
                                             <td><%= dateStr %></td>
-                                            <td><span class="badge bg-success">Resolved</span></td>
+                                           <td><span class="badge bg-success"><%= status %></span></td>
                                             <td class="actions">
                                                 <button class="btn edit-btn" onclick="viewFeedback(
                                                     '<%= feedbackId %>',
