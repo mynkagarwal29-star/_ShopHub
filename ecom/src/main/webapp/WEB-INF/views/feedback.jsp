@@ -634,56 +634,66 @@
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <% if (feedbackList != null && !feedbackList.isEmpty()) {
-                                        for (Feedback feedback : feedbackList) {
-                                            String feedbackId = "#FB-" + idFormat.format(feedback.getId());
-                                            String customerName = StringEscapeUtils.escapeHtml4(feedback.getAccount().getName());
-                                            String orderId = "Order #" + feedback.getOrder().getId();
-                                            String comment = StringEscapeUtils.escapeHtml4(feedback.getComment());
-                                            String dateStr = dateFormat.format(feedback.getCreatedAt());
-                                            String status = StringEscapeUtils.escapeHtml4(feedback.getOrder().getDelivery_status());
-                                    %>
-                                        <tr data-rating="<%= feedback.getRating() %>">
-                                            <td><%= feedbackId %></td>
-                                            <td><%= customerName %></td>
-                                            <td>
-                                                <a href="AdminSideOrder?userId=<%= feedback.getOrder().getAccount().getId() %>&userName=<%= java.net.URLEncoder.encode(feedback.getOrder().getAccount().getName(), "UTF-8") %>" 
-                                                   style="color: #007bff; text-decoration: none; font-weight: bold; padding: 5px 10px; border: 1px solid #007bff; border-radius: 4px; display: inline-block;">
-                                                    <%= orderId %>
-                                                </a>
-                                            </td>
-                                            <td>
-                                                <div class="rating">
-                                                    <% for (int i = 1; i <= 5; i++) { %>
-                                                        <i class="bi bi-star<%= i <= feedback.getRating() ? "-fill" : "" %>"></i>
-                                                    <% } %>
-                                                </div>
-                                            </td>
-                                            <td class="feedback-message"><%= comment %></td>
-                                            <td><%= dateStr %></td>
-                                            <td><span class="badge bg-success"><%= status %></span></td>
-                                            <td class="actions">
-                                                <button class="btn edit-btn" onclick="viewFeedback(
-                                                    '<%= feedbackId %>',
-                                                    '<%= customerName %>',
-                                                    '<%= orderId %>',
-                                                    <%= feedback.getRating() %>,
-                                                    '<%= comment %>',
-                                                    '<%= dateStr %>'
-                                                )">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                                <button class="btn delete-btn" onclick="deleteFeedback(<%= feedback.getId() %>)">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <% 
-                                        }
-                                    } 
-                                    %>
-                                </tbody>
+                             <tbody>
+<%
+if (feedbackList != null && !feedbackList.isEmpty()) {
+    for (Feedback feedback : feedbackList) {
+        String feedbackId = "#FB-" + idFormat.format(feedback.getId());
+        String customerName = feedback.getAccount() != null ? StringEscapeUtils.escapeHtml4(feedback.getAccount().getName()) : "N/A";
+        String orderId = feedback.getOrder() != null ? "Order #" + feedback.getOrder().getId() : "N/A";
+        String comment = feedback.getComment() != null ? StringEscapeUtils.escapeHtml4(feedback.getComment()) : "";
+        String status = (feedback.getOrder() != null && feedback.getOrder().getDelivery_status() != null) ? StringEscapeUtils.escapeHtml4(feedback.getOrder().getDelivery_status()) : "N/A";
+
+        // Convert LocalDateTime to formatted String safely
+        String dateStr = "N/A";
+        if (feedback.getCreatedAt() != null) {
+            dateStr = feedback.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"));
+        }
+
+        int rating = feedback.getRating();
+%>
+<tr data-rating="<%= rating %>">
+    <td><%= feedbackId %></td>
+    <td><%= customerName %></td>
+    <td>
+        <% if (feedback.getOrder() != null && feedback.getOrder().getAccount() != null) { %>
+            <a href="AdminSideOrder?userId=<%= feedback.getOrder().getAccount().getId() %>&userName=<%= java.net.URLEncoder.encode(feedback.getOrder().getAccount().getName(), "UTF-8") %>" 
+               style="color: #007bff; text-decoration: none; font-weight: bold; padding: 5px 10px; border: 1px solid #007bff; border-radius: 4px; display: inline-block;">
+                <%= orderId %>
+            </a>
+        <% } else { %>
+            <%= orderId %>
+        <% } %>
+    </td>
+    <td>
+        <div class="rating">
+            <% for (int i = 1; i <= 5; i++) { %>
+                <i class="bi bi-star<%= i <= rating ? "-fill" : "" %>"></i>
+            <% } %>
+        </div>
+    </td>
+    <td class="feedback-message"><%= comment %></td>
+    <td><%= dateStr %></td>
+    <td><span class="badge bg-success"><%= status %></span></td>
+    <td class="actions">
+        <button class="btn edit-btn" onclick="viewFeedback(
+            '<%= feedbackId.replace("'", "\\'") %>',
+            '<%= customerName.replace("'", "\\'") %>',
+            '<%= orderId.replace("'", "\\'") %>',
+            <%= rating %>,
+            '<%= comment.replace("'", "\\'") %>',
+            '<%= dateStr %>'
+        )">
+            <i class="bi bi-eye"></i>
+        </button>
+        <button class="btn delete-btn" onclick="deleteFeedback(<%= feedback.getId() %>)">
+            <i class="bi bi-trash"></i>
+        </button>
+    </td>
+</tr>
+<% } } %>
+</tbody>
+
                             </table>
                         </div>
                     </div>
