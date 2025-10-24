@@ -2,34 +2,36 @@
 <html lang="en">
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="java.util.List" %>
-<%@ page import="com.example.jpa.model.Feedback" %>
 <%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.text.DecimalFormat" %>
+<%@ page import="com.example.jpa.model.Feedback" %>
 <%@ page import="com.example.jpa.model.Account" %>
-<% Account currentUser = (Account) session.getAttribute("currentUser");
-if (currentUser == null || !"admin".equals(currentUser.getRole())) {
-    response.sendRedirect("/log");
-    return;
-} %>
+<%@ page import="org.apache.commons.text.StringEscapeUtils" %>
 <%
-    List<Feedback> feedbackList = (List <Feedback>) request.getAttribute("feedbackList");
+    String contextPath = request.getContextPath();
+    Account currentUser = (Account) session.getAttribute("currentUser");
+    if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
+        response.sendRedirect("/log");
+        return;
+    }
+    
+    List<Feedback> feedbackList = (List<Feedback>) request.getAttribute("feedbackList");
     Integer totalReviews = (Integer) request.getAttribute("totalReviews");
     Double avgRating = (Double) request.getAttribute("avgRating");
     Integer fiveStarReviews = (Integer) request.getAttribute("fiveStarReviews");
-    Integer unresolvedCount = (Integer) request.getAttribute("unresolvedCount");
     
     SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
+    DecimalFormat idFormat = new DecimalFormat("000000");
 %>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Feedback | ShopHub Admin</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ADMIN.css">
+    <link rel="stylesheet" href="<%= contextPath %>/css/ADMIN.css">
     <style>
-        /* Existing styles remain the same */
         :root {
             --primary: #4e73df;
             --secondary: #858796;
@@ -40,6 +42,7 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             --light: #f8f9fc;
             --dark: #5a5c69;
         }
+        
         html, body {
             height: 100%;
             overflow-x: hidden;
@@ -47,9 +50,11 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             color: var(--dark);
             background-color: #f5f5f5;
         }
+        
         .container-fluid {
             min-height: 100vh;
         }
+        
         .sidebar {
             min-height: 100vh;
             position: sticky;
@@ -60,6 +65,7 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             z-index: 100;
             box-shadow: 0 2px 4px rgba(0,0,0,.08);
         }
+        
         .sidebar .nav-link {
             color: rgba(255, 255, 255, 0.8) !important;
             font-weight: 500;
@@ -68,6 +74,7 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             border-radius: 8px;
             transition: all 0.3s;
         }
+        
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
             background-color: rgba(255, 255, 255, 0.1) !important;
             color: white !important;
@@ -80,6 +87,7 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             border-radius: 10px;
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
+        
         .table-container thead {
             position: sticky;
             top: 0;
@@ -87,6 +95,7 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             z-index: 10;
             border-bottom: 2px solid var(--primary);
         }
+        
         .table-container thead th {
             font-weight: 600;
             color: var(--primary);
@@ -95,36 +104,45 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             letter-spacing: 1px;
             padding: 15px;
         }
+        
         .table-container tbody tr {
             border-bottom: 1px solid #e3e6f0;
             transition: background-color 0.2s;
         }
+        
         .table-container tbody tr:hover {
             background-color: rgba(78, 115, 223, 0.05);
         }
+        
         .table-container tbody td {
             padding: 15px;
             vertical-align: middle;
         }
+        
         .table-container::-webkit-scrollbar {
             width: 8px;
         }
+        
         .table-container::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 4px;
         }
+        
         .table-container::-webkit-scrollbar-thumb {
             background: var(--primary);
             border-radius: 4px;
         }
+        
         .table-container::-webkit-scrollbar-thumb:hover {
             background: #2e59d9;
         }
+        
         .main-content {
             min-height: 100vh;
             padding-bottom: 30px;
             background-color: #f5f5f5;
         }
+        
         /* Card Styles */
         .card {
             border: none;
@@ -133,10 +151,12 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             margin-bottom: 25px;
             transition: transform 0.3s, box-shadow 0.3s;
         }
+        
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.2);
         }
+        
         .card-header {
             background-color: white;
             border-bottom: 1px solid #e3e6f0;
@@ -144,6 +164,7 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             font-weight: 600;
             color: var(--dark);
         }
+        
         /* Button Styles */
         .btn-primary {
             background-color: var(--primary);
@@ -153,20 +174,24 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             font-weight: 500;
             transition: all 0.3s;
         }
+        
         .btn-primary:hover {
             background-color: #2e59d9;
             border-color: #2e59d9;
             transform: translateY(-2px);
         }
+        
         .btn-outline-secondary {
             border-radius: 8px;
             padding: 8px 16px;
             font-weight: 500;
             transition: all 0.3s;
         }
+        
         .btn-outline-secondary:hover {
             transform: translateY(-2px);
         }
+        
         /* Form Styles */
         .form-control, .form-select {
             border-radius: 8px;
@@ -174,10 +199,12 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             padding: 10px 15px;
             transition: all 0.2s ease-in-out;
         }
+        
         .form-control:focus, .form-select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
         }
+        
         /* Topbar Styles */
         .topbar {
             background-color: white;
@@ -185,34 +212,41 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             padding: 15px 0;
             margin-bottom: 25px;
         }
+        
         .topbar .input-group {
             max-width: 300px;
         }
+        
         .topbar .form-control {
             border-radius: 50px 0 0 50px;
             border-right: none;
         }
+        
         .topbar .btn {
             border-radius: 0 50px 50px 0;
             background-color: var(--primary);
             border-color: var(--primary);
         }
+        
         /* Dashboard Cards */
         .cardbox .card {
             border-left: 4px solid var(--primary);
         }
+        
         .cardbox .card .numbers {
             font-size: 1.75rem;
             font-weight: bold;
             color: var(--primary);
             margin-bottom: 5px;
         }
+        
         .cardbox .card .cardName {
             font-size: 0.9rem;
             color: var(--secondary);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+        
         .cardbox .card .iconbox {
             width: 50px;
             height: 50px;
@@ -224,6 +258,7 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             color: var(--primary);
             font-size: 1.5rem;
         }
+        
         /* Action Buttons */
         .actions .edit-btn, .actions .delete-btn {
             padding: 6px 12px;
@@ -232,26 +267,32 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             margin-right: 5px;
             transition: all 0.2s;
         }
+        
         .actions .edit-btn {
             background: rgba(26, 188, 156, 0.1);
             color: var(--success);
         }
+        
         .actions .edit-btn:hover {
             background: var(--success);
             color: white;
         }
+        
         .actions .delete-btn {
             background: rgba(231, 74, 59, 0.1);
             color: var(--danger);
         }
+        
         .actions .delete-btn:hover {
             background: var(--danger);
             color: white;
         }
+        
         /* Star Rating */
         .rating {
             color: var(--warning);
         }
+        
         /* Feedback Message */
         .feedback-message {
             max-width: 300px;
@@ -259,40 +300,27 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .form-container {
-                margin: 20px 15px;
-                padding: 20px;
-            }
-            
-            .form-title {
-                font-size: 1.5rem;
-            }
-            
-            .btn-submit, .btn-outline-secondary {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-        }
         
+        /* Adjust card colors based on value */
         .cardbox .card.bg-success {
             border-left: 4px solid #1cc88a;
         }
+        
         .cardbox .card.bg-warning {
             border-left: 4px solid #f6c23e;
         }
+        
         .cardbox .card.bg-danger {
             border-left: 4px solid #e74a3b;
         }
-
-        /* Adjust card colors based on value */
+        
         .cardbox .card .numbers {
             font-size: 1.75rem;
             font-weight: bold;
             color: #fff;
             margin-bottom: 5px;
         }
+        
         .rating {
             color: #f6c23e; /* Gold color for stars */
         }
@@ -303,176 +331,277 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             border: none;
             box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15);
         }
+        
         .modal-header {
             border-bottom: 1px solid #e3e6f0;
             padding: 1.5rem;
         }
+        
         .modal-body {
             padding: 1.5rem;
         }
+        
         .modal-footer {
             border-top: 1px solid #e3e6f0;
             padding: 1rem 1.5rem;
         }
+        
         .feedback-detail-label {
             font-weight: 600;
             color: var(--dark);
         }
+        
         .feedback-detail-value {
             margin-bottom: 1rem;
         }
+        
         .feedback-detail-comment {
             background-color: #f8f9fc;
             padding: 1rem;
             border-radius: 8px;
             border-left: 4px solid var(--primary);
         }
+        
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -250px;
+                width: 250px;
+                height: 100vh;
+                z-index: 999;
+                transition: all 0.3s;
+            }
+            
+            .sidebar.show {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .table-container {
+                max-height: 400px;
+            }
+            
+            .feedback-message {
+                max-width: 150px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .cardbox .card .numbers {
+                font-size: 1.5rem;
+            }
+            
+            .cardbox .card .cardName {
+                font-size: 0.8rem;
+            }
+            
+            .table-container {
+                max-height: 300px;
+            }
+            
+            .table-container thead th, 
+            .table-container tbody td {
+                padding: 10px 5px;
+                font-size: 0.85rem;
+            }
+            
+            .actions .edit-btn, 
+            .actions .delete-btn {
+                padding: 4px 8px;
+                font-size: 0.75rem;
+            }
+            
+            .feedback-message {
+                max-width: 100px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .cardbox .card .numbers {
+                font-size: 1.25rem;
+            }
+            
+            .cardbox .card .cardName {
+                font-size: 0.7rem;
+            }
+            
+            .cardbox .card .iconbox {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .table-container {
+                max-height: 250px;
+            }
+            
+            .table-container thead th, 
+            .table-container tbody td {
+                padding: 8px 3px;
+                font-size: 0.75rem;
+            }
+            
+            .actions .edit-btn, 
+            .actions .delete-btn {
+                padding: 3px 6px;
+                font-size: 0.7rem;
+            }
+            
+            .feedback-message {
+                max-width: 80px;
+            }
+        }
     </style>
 </head>
 <body>
-     <div class="container-fluid">
+    <div class="container-fluid">
         <div class="row">
-              <!-- Sidebar -->
-      <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
-            <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active text-white" href="#">
-                            <i class="fas fa-tachometer-alt me-2"></i> Admin Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="viewitem">
-                            <i class="fas fa-home me-2"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="addForm">
-                            <i class="fas fa-plus-circle me-2"></i> Add Product
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="Category">
-                            <i class="fas fa-plus-circle me-2"></i> Category
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="trainer">
-                            <i class="fas fa-users me-2"></i> View Users
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="AdminSideOrder">
-                            <i class="fas fa-shopping-bag me-2"></i> View Orders
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="feed">
-                            <i class="fas fa-comments me-2"></i> View Feedback
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="logout">
-                            <i class="fas fa-sign-out-alt me-2"></i> Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse" id="sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active text-white" href="#">
+                                <i class="fas fa-tachometer-alt me-2"></i> Admin Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="viewitem">
+                                <i class="fas fa-home me-2"></i> Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="addForm">
+                                <i class="fas fa-plus-circle me-2"></i> Add Product
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="Category">
+                                <i class="fas fa-plus-circle me-2"></i> Category
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="trainer">
+                                <i class="fas fa-users me-2"></i> View Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="AdminSideOrder">
+                                <i class="fas fa-shopping-bag me-2"></i> View Orders
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="feed">
+                                <i class="fas fa-comments me-2"></i> View Feedback
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="logout">
+                                <i class="fas fa-sign-out-alt me-2"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
             
             <!-- Main Content -->
             <div class="col-md-10 main-content">
                 <!-- Topbar -->
-                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <button class="btn btn-link d-md-none" type="button" data-bs-toggle="collapse" data-bs-target=".sidebar">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <button class="btn btn-link d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar">
                         <i class="fas fa-bars"></i>
                     </button>
                     <div>
                         <a class="navbar-brand" href="#">
-            			    <i class="fas fa-shopping-bag me-2"></i>ShopHub
-         			    </a>
+                            <i class="fas fa-shopping-bag me-2"></i>ShopHub
+                        </a>
                     </div>
-                     <!-- User Info Section (Logged In As) -->
-    <div class="d-flex align-items-center">
-        <%
-            String userEmail = currentUser.getEmail();
-            if (userEmail != null) {
-        %>
-            <!-- Show logged-in email -->
-            <div class="d-flex align-items-center">
-                <span class="me-3">Logged in as: <strong><%= userEmail %></strong></span>
-            </div>
-        <%
-            }
-        %>
-    </div>
+                    <!-- User Info Section (Logged In As) -->
+                    <div class="d-flex align-items-center">
+                        <span class="me-3">Logged in as: <strong><%= currentUser.getEmail() %></strong></span>
+                    </div>
                 </div>
+                
                 <div class="topbar d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
                         <h4 class="mb-0">View Feedback</h4>
                     </div>
                 </div>
                  
-<!-- Stats Cards with colors -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card cardbox bg-primary text-white">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="numbers"><%= totalReviews != null ? totalReviews : "0" %></div>
-                    <div class="cardName">Total Reviews</div>
-                </div>
-                <div class="iconbox">
-                    <i class="bi bi-star"></i>
-                </div>
-            </div>
-        </div>
-    </div>
+                <!-- Stats Cards with colors -->
+                <div class="row mb-4">
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card cardbox bg-primary text-white">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="numbers"><%= totalReviews != null ? totalReviews : "0" %></div>
+                                    <div class="cardName">Total Reviews</div>
+                                </div>
+                                <div class="iconbox">
+                                    <i class="bi bi-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="col-md-3">
-        <div class="card cardbox <%= (avgRating != null && avgRating > 4) ? "bg-success" : (avgRating != null && avgRating > 3) ? "bg-warning" : "bg-danger" %> text-white">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="numbers"><%= avgRating != null ? avgRating : "0.0" %></div>
-                    <div class="cardName">Avg Rating</div>
-                </div>
-                <div class="iconbox">
-                    <i class="bi bi-star-half"></i>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <%
+                            String avgRatingClass = "bg-danger";
+                            if (avgRating != null) {
+                                if (avgRating > 4) {
+                                    avgRatingClass = "bg-success";
+                                } else if (avgRating > 3) {
+                                    avgRatingClass = "bg-warning";
+                                }
+                            }
+                        %>
+                        <div class="card cardbox <%= avgRatingClass %> text-white">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="numbers"><%= avgRating != null ? avgRating : "0.0" %></div>
+                                    <div class="cardName">Avg Rating</div>
+                                </div>
+                                <div class="iconbox">
+                                    <i class="bi bi-star-half"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="col-md-3">
-        <div class="card cardbox bg-warning text-white">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="numbers"><%= fiveStarReviews != null ? fiveStarReviews : "0" %></div>
-                    <div class="cardName">5-Star Reviews</div>
-                </div>
-                <div class="iconbox">
-                    <i class="bi bi-star-fill"></i>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card cardbox bg-warning text-white">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="numbers"><%= fiveStarReviews != null ? fiveStarReviews : "0" %></div>
+                                    <div class="cardName">5-Star Reviews</div>
+                                </div>
+                                <div class="iconbox">
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <!-- New Card for Developer Contact -->
-    <div class="col-md-3">
-        <div class="card cardbox bg-info text-white">
-            <div class="card-body d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="numbers">Always Here for New Features!</div>
-                    <div class="cardName">Contact Developer</div>
+                    <!-- New Card for Developer Contact -->
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card cardbox bg-info text-white">
+                            <div class="card-body d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="numbers">Always Here for New Features!</div>
+                                    <div class="cardName">Contact Developer</div>
+                                </div>
+                                <div class="iconbox">
+                                    <i class="bi bi-person-check"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="iconbox">
-                    <i class="bi bi-person-check"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 
                 <!-- Feedback Table -->
                 <div class="card">
@@ -480,14 +609,14 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
                         <h5 class="mb-0">All Feedback</h5>
                         <div class="d-flex">
                             <!-- Feedback Rating Filter -->
-                        <select class="form-select me-2" style="width: auto;" id="ratingFilter">
-                            <option value="all">All Ratings</option>
-                            <option value="5">5 Stars</option>
-                            <option value="4">4 Stars</option>
-                            <option value="3">3 Stars</option>
-                            <option value="2">2 Stars</option>
-                            <option value="1">1 Star</option>
-                        </select>
+                            <select class="form-select me-2" style="width: auto;" id="ratingFilter">
+                                <option value="all">All Ratings</option>
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="2">2 Stars</option>
+                                <option value="1">1 Star</option>
+                            </select>
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -508,31 +637,22 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
                                 <tbody>
                                     <% if (feedbackList != null && !feedbackList.isEmpty()) {
                                         for (Feedback feedback : feedbackList) {
-                                            // Format the feedback ID
-                                            String feedbackId = String.format("#FB-%06d", feedback.getId());
-                                            
-                                            // Format the date
-                                            String dateStr = dateFormat.format(java.sql.Timestamp.valueOf(feedback.getCreatedAt()));
-                                            
-                                            // Customer name
-                                            String customerName = feedback.getAccount().getName();
-                                            
-                                            // Order ID
+                                            String feedbackId = "#FB-" + idFormat.format(feedback.getId());
+                                            String customerName = StringEscapeUtils.escapeHtml4(feedback.getAccount().getName());
                                             String orderId = "Order #" + feedback.getOrder().getId();
-                                            String status = feedback.getOrder().getDelivery_status();
+                                            String comment = StringEscapeUtils.escapeHtml4(feedback.getComment());
+                                            String dateStr = dateFormat.format(feedback.getCreatedAt());
+                                            String status = StringEscapeUtils.escapeHtml4(feedback.getOrder().getDelivery_status());
                                     %>
                                         <tr data-rating="<%= feedback.getRating() %>">
                                             <td><%= feedbackId %></td>
                                             <td><%= customerName %></td>
-                                            
-                                 	    <td>
-										    <a href="AdminSideOrder?userId=<%= feedback.getOrder().getAccount().getId() %>&userName=<%= java.net.URLEncoder.encode(feedback.getOrder().getAccount().getName(), "UTF-8") %>" 
-										       style="color: #007bff; text-decoration: none; font-weight: bold; padding: 5px 10px; border: 1px solid #007bff; border-radius: 4px; display: inline-block;">
-										        <%= orderId %>
-										    </a>
-										</td>
-
-
+                                            <td>
+                                                <a href="AdminSideOrder?userId=<%= feedback.getOrder().getAccount().getId() %>&userName=<%= java.net.URLEncoder.encode(feedback.getOrder().getAccount().getName(), "UTF-8") %>" 
+                                                   style="color: #007bff; text-decoration: none; font-weight: bold; padding: 5px 10px; border: 1px solid #007bff; border-radius: 4px; display: inline-block;">
+                                                    <%= orderId %>
+                                                </a>
+                                            </td>
                                             <td>
                                                 <div class="rating">
                                                     <% for (int i = 1; i <= 5; i++) { %>
@@ -540,7 +660,7 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
                                                     <% } %>
                                                 </div>
                                             </td>
-                                            <td class="feedback-message"><%= feedback.getComment() %></td>
+                                            <td class="feedback-message"><%= comment %></td>
                                             <td><%= dateStr %></td>
                                             <td><span class="badge bg-success"><%= status %></span></td>
                                             <td class="actions">
@@ -549,7 +669,7 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
                                                     '<%= customerName %>',
                                                     '<%= orderId %>',
                                                     <%= feedback.getRating() %>,
-                                                    '<%= feedback.getComment() %>',
+                                                    '<%= comment %>',
                                                     '<%= dateStr %>'
                                                 )">
                                                     <i class="bi bi-eye"></i>
@@ -634,6 +754,8 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             </div>
         </div>
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function deleteFeedback(id) {
             if (confirm('Are you sure you want to delete this feedback?')) {
@@ -679,7 +801,18 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
                 }
             });
         });
+        
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.querySelector('.btn-link.d-md-none');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+        });
     </script>
-     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
