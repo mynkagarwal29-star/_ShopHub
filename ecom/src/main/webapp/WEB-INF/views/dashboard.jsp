@@ -132,7 +132,7 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link text-white" href="feed">
+        <a class="nav-link text-white" href="/feed">
           <i class="fas fa-comments me-2"></i> View Feedback
         </a>
       </li>
