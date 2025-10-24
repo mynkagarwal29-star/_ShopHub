@@ -110,48 +110,52 @@
                 <div class="form-container">
                     <h2 class="form-title"><%= (cat == null) ? "Add New Category" : "Edit Category" %></h2>
                     <h4>${added}</h4>
-                   <form action="${pageContext.request.contextPath}/<%= (cat == null) ? "addCategory" : "updateCategory" %>" method="post">
+                   <form action="${pageContext.request.contextPath}/<%= (cat == null) ? "addCategory" : "updateCategory" %>" 
+      method="post" 
+      enctype="multipart/form-data">
 
-                    	<% if (cat != null) { %>
-				            <input type="hidden" name="id" value="<%= cat.getId() %>">
-				        <% } %>
-                    	
-                        <div class="row form-row">
-                           <div class="col-md-6">
-							    <label for="productName" class="form-label required">Category Name</label>
-							    <input 
-							        type="text" 
-							        class="form-control" 
-							        id="productName" 
-							        name="category" 
-							        value="<%= (cat != null) ? cat.getCategory() : "" %>" 
-							        <%= (cat != null && "RANDOM FINDS".equalsIgnoreCase(cat.getCategory())) ? "readonly" : "required" %>>
-							    
-							    <% if (cat != null && "RANDOM FINDS".equalsIgnoreCase(cat.getCategory())) { %>
-							        <small class="text-muted">This category name cannot be edited.</small>
-							    <% } %>
-							</div>
-                        </div>
-                        <div class="form-row">
-                            <label for="CategoryImage" class="form-label">Category Image</label>
-                            <input type="file" class="form-control" id="productImage" name="file" accept="image/*" >
-                             <% if (cat != null && cat.getImage() != null) { %>
-					            <p>Current Image:</p>
-					            <img src="/uploads/<%= cat.getImage() %>" width="100" height="100">
-					            <br><br>
-					        <% } else {%>
-                            <img id="imagePreview" class="image-preview" alt="Preview">
-                            <%} %>
-                        </div>
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="/Category" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i> Back to Category
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-submit">
-                                <i class="fas fa-save me-2"></i> <%= (cat == null) ? "Add Category" : "Update Category" %>
-                            </button>
-                        </div>
-                    </form>
+    <% if (cat != null) { %>
+        <input type="hidden" name="id" value="<%= cat.getId() %>">
+    <% } %>
+    
+    <div class="row form-row">
+       <div class="col-md-6">
+            <label for="productName" class="form-label required">Category Name</label>
+            <input 
+                type="text" 
+                class="form-control" 
+                id="productName" 
+                name="category" 
+                value="<%= (cat != null) ? cat.getCategory() : "" %>" 
+                <%= (cat != null && "RANDOM FINDS".equalsIgnoreCase(cat.getCategory())) ? "readonly" : "required" %>>
+            
+            <% if (cat != null && "RANDOM FINDS".equalsIgnoreCase(cat.getCategory())) { %>
+                <small class="text-muted">This category name cannot be edited.</small>
+            <% } %>
+        </div>
+    </div>
+    
+    <div class="form-row">
+        <label for="CategoryImage" class="form-label">Category Image</label>
+        <input type="file" class="form-control" id="productImage" name="file" accept="image/*">
+        <% if (cat != null && cat.getImage() != null) { %>
+            <p>Current Image:</p>
+            <img src="/uploads/<%= cat.getImage() %>" width="100" height="100">
+        <% } else { %>
+            <img id="imagePreview" class="image-preview" alt="Preview">
+        <% } %>
+    </div>
+    
+    <div class="d-flex justify-content-between mt-4">
+        <a href="/Category" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Category
+        </a>
+        <button type="submit" class="btn btn-primary btn-submit">
+            <i class="fas fa-save me-2"></i> <%= (cat == null) ? "Add Category" : "Update Category" %>
+        </button>
+    </div>
+</form>
+
                 </div>
             </main>
         </div>

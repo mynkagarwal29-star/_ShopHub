@@ -2,6 +2,7 @@
 <html lang="en">
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
 <%@ page import="com.example.jpa.model.Feedback" %>
 <%@ page import="com.example.jpa.model.Account" %>
 <%@ page import="java.text.SimpleDateFormat" %>
@@ -504,13 +505,7 @@
                                             String customerName = feedback.getAccount().getName();
                                             
                                             // Order ID
-                                            String orderId = "Order #" + feedback.getOrder().getId();
-                                            
-                                            // Safely get status
-                                            String status = "Unknown";
-                                            if (feedback.getOrder() != null && feedback.getOrder().getDelivery_status() != null) {
-                                                status = feedback.getOrder().getDelivery_status();
-                                            }
+                                            String orderId = "Order #" + feedback.getOrder().getId();                                           
                                     %>
                                         <tr data-rating="<%= feedback.getRating() %>">
                                             <td><%= feedbackId %></td>
@@ -532,18 +527,26 @@
                                             </td>
                                             <td class="feedback-message"><%= feedback.getComment() %></td>
                                             <td><%= dateStr %></td>
-                                           <td><span class="badge bg-success"><%= status %></span></td>
+                                           <td>
+											    <% 
+											        String status = "Unknown";
+											        if (feedback.getOrder() != null && feedback.getOrder().getDelivery_status() != null) {
+											            status = feedback.getOrder().getDelivery_status();
+											        }
+											    %>
+											    <span class="badge bg-success"><%= status %></span>
+											</td>
                                             <td class="actions">
-                                                <button class="btn edit-btn" onclick="viewFeedback(
-                                                    '<%= feedbackId %>',
-                                                    '<%= customerName %>',
-                                                    '<%= orderId %>',
-                                                    <%= feedback.getRating() %>,
-                                                    '<%= feedback.getComment() %>',
-                                                    '<%= dateStr %>'
-                                                )">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
+                                               <button class="btn edit-btn" onclick="viewFeedback(
+												    '<%= feedbackId %>',
+												    '<%= StringEscapeUtils.escapeEcmaScript(customerName) %>',
+												    '<%= StringEscapeUtils.escapeEcmaScript(orderId) %>',
+												    <%= feedback.getRating() %>,
+												    '<%= StringEscapeUtils.escapeEcmaScript(feedback.getComment()) %>',
+												    '<%= dateStr %>'
+												)">
+												    <i class="bi bi-eye"></i>
+												</button>
                                                 <button class="btn delete-btn" onclick="deleteFeedback(<%= feedback.getId() %>)">
                                                     <i class="bi bi-trash"></i>
                                                 </button>

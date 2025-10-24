@@ -133,10 +133,10 @@ public class CatController {
         cd.deleteById(id);
         return "redirect:/Category";
     }
-    
+     
     
     @GetMapping("/editCategory/{id}")
-    public String editCategory(@PathVariable("id") int id, HttpServletRequest request) {
+    public String editCategory(@PathVariable("id") long id, HttpServletRequest request) {
         Category category = cd.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid category Id:" + id));
         request.setAttribute("cat", category);

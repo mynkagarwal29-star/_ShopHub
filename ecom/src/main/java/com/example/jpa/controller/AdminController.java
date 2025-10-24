@@ -120,16 +120,14 @@ public class AdminController {
   */  
     // Admin-only: list all feedback
     @GetMapping("/feed")
-    public String listAllFeedback(Model model, HttpSession session) {
+    public String listAllFeedback(Model model, HttpSession session, HttpSession request) {
         Account user = (Account) session.getAttribute("currentUser");
         if (user == null || !user.getRole().equalsIgnoreCase("ADMIN")) {
             return "redirect:/log";
         }
 
         List<Feedback> feedbackList = feedbackService.getAllFeedbacks();
-        model.addAttribute("feedbackList", feedbackList);
-
-        
+        //model.addAttribute("feedbackList", feedbackList);
         int totalReviews = feedbackList.size();
         double avgRating = 0;
         int fiveStarReviews = 0;
@@ -142,9 +140,11 @@ public class AdminController {
 
         avgRating = Math.round(avgRating * 10) / 10.0;
 
-        model.addAttribute("totalReviews", totalReviews);
-        model.addAttribute("avgRating", avgRating);
-        model.addAttribute("fiveStarReviews", fiveStarReviews);
+       
+		request.setAttribute("feedbackList", feedbackList);
+        request.setAttribute("totalReviews", totalReviews);
+        request.setAttribute("avgRating", avgRating);
+        request.setAttribute("fiveStarReviews", fiveStarReviews);
         
         return "feedback";
     }
