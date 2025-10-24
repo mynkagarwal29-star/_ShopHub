@@ -194,7 +194,7 @@
         <nav class="col-md-3 col-lg-2 sidebar d-md-block collapse" id="sidebarMenu">
             <div class="pt-3">
                 <ul class="nav flex-column">
-                    <li class="nav-item"><a class="nav-link active" href="#"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="viewitem"><i class="fas fa-home me-2"></i>Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="addForm"><i class="fas fa-plus-circle me-2"></i>Add Product</a></li>
                     <li class="nav-item"><a class="nav-link" href="Category"><i class="fas fa-list me-2"></i>Category</a></li>
@@ -214,7 +214,14 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 <h4 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>View Feedback</h4>
-                <span class="fw-bold text-primary">Admin: <%= currentUser.getEmail() %></span>
+                   <div class="d-flex align-items-center">
+				        <a class="navbar-brand" href="#">
+				            <i class="fas fa-shopping-bag me-2"></i>ShopHub
+				        </a>
+				    </div>
+               <div class="d-flex align-items-center">
+                <span class="me-3">Logged in as: <strong><%= currentUser.getEmail() %></strong></span>
+            </div>
             </div>
 
             <!-- DASHBOARD CARDS -->
