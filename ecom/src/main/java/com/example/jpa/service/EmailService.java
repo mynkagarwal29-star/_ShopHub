@@ -1,22 +1,40 @@
 package com.example.jpa.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import java.io.IOException;
+
 import org.springframework.stereotype.Service;
+
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
-
+    // Keep method signature same
     public void sendSimpleMail(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("your-email@gmail.com"); // same as spring.mail.username
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
-        mailSender.send(message);
+        Email from = new Email("your_verified_sender@example.com"); // must match your SendGrid verified sender
+        Email toEmail = new Email(to);
+        Content content = new Content("text/plain", text);
+        Mail mail = new Mail(from, subject, toEmail, content);
+
+        SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
+        Request request = new Request();
+
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+
+            System.out.println("SendGrid Response Code: " + response.getStatusCode());
+        } catch (IOException ex) {
+            // Optional: log or rethrow
+            throw new RuntimeException("Error sending email via SendGrid", ex);
+        }
     }
 }
