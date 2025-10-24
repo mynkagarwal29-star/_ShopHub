@@ -110,8 +110,8 @@
                 <div class="form-container">
                     <h2 class="form-title"><%= (cat == null) ? "Add New Category" : "Edit Category" %></h2>
                     <h4>${added}</h4>
-                    <form action="<%= (cat == null) ? "addCategory" : "/updateCategory" %>" method="post" enctype="multipart/form-data">
-                    
+                   <form action="${pageContext.request.contextPath}/<%= (cat == null) ? "addCategory" : "updateCategory" %>" method="post">
+
                     	<% if (cat != null) { %>
 				            <input type="hidden" name="id" value="<%= cat.getId() %>">
 				        <% } %>

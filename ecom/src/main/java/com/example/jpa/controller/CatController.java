@@ -135,7 +135,7 @@ public class CatController {
         Category category = cd.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid category Id:" + id));
         request.setAttribute("cat", category);
-        return "/addCat";
+        return "addCat";
     }
     
     @PostMapping("/updateCategory")

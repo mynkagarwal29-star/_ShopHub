@@ -159,7 +159,8 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
                         <h6 class="text-uppercase fw-bold mb-1"><%= cat.getCategory() %></h6>
                         <p class="text-muted mb-2">ID: <%= cat.getId() %></p>
                         <div class="d-flex gap-2">
-                            <a href="/editCategory/<%= cat.getId() %>" class="btn btn-warning btn-sm">Edit</a>
+                            <a href="${pageContext.request.contextPath}/editCategory/<%= cat.getId() %>" class="btn btn-warning btn-sm">Edit</a>
+
                             <% if (!"RANDOM FINDS".equalsIgnoreCase(cat.getCategory())) { %>
                                 <a href="/deletecat/<%= cat.getId() %>"
                                    class="btn btn-danger btn-sm"
