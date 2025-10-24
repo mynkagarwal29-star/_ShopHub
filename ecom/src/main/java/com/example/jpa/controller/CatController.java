@@ -129,6 +129,7 @@ public class CatController {
         return "redirect:/Category";
     }
     
+    
     @GetMapping("/editCategory/{id}")
     public String editCategory(@PathVariable("id") int id, HttpServletRequest request) {
         Category category = cd.findById(id)

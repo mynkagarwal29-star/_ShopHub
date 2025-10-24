@@ -8,7 +8,7 @@
 <%
 		String contextPath = request.getContextPath();
 		Account currentUser = (Account) session.getAttribute("currentUser");
-		if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
+		if (currentUser == null || !"admin".equals(currentUser.getRole())) {
 		    response.sendRedirect("/log");
 		    return;
 		}
