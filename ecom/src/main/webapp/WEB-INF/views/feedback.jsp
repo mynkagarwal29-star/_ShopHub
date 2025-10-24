@@ -6,12 +6,12 @@
 <%@ page import="com.example.jpa.model.Account" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%
-		String contextPath = request.getContextPath();
-		Account currentUser = (Account) session.getAttribute("currentUser");
-		if (currentUser == null || !"admin".equals(currentUser.getRole())) {
-		    response.sendRedirect("/log");
-		    return;
-		}
+        String contextPath = request.getContextPath();
+        Account currentUser = (Account) session.getAttribute("currentUser");
+        if (currentUser == null || !"admin".equals(currentUser.getRole())) {
+            response.sendRedirect("/log");
+            return;
+        }
     List<Feedback> feedbackList = (List <Feedback>) request.getAttribute("feedbackList");
     Integer totalReviews = (Integer) request.getAttribute("totalReviews");
     Double avgRating = (Double) request.getAttribute("avgRating");
@@ -25,7 +25,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Feedback | ShopHub Admin</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Using a more reliable CDN for Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Also adding Font Awesome as fallback for icons used in sidebar -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ADMIN.css">
     <style>
         /* Existing styles remain the same */
@@ -315,13 +318,23 @@
             border-radius: 8px;
             border-left: 4px solid var(--primary);
         }
+        
+        /* Debug styles to ensure table is visible */
+        .table-container {
+            min-height: 200px;
+        }
+        .no-data-message {
+            text-align: center;
+            padding: 20px;
+            color: var(--secondary);
+        }
     </style>
 </head>
 <body>
      <div class="container-fluid">
         <div class="row">
               <!-- Sidebar -->
-        <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+        <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse" id="sidebar">
             <div class="position-sticky pt-3">
                 <ul class="nav flex-column">
                     <li class="nav-item">
@@ -538,8 +551,14 @@
                                         </tr>
                                     <% 
                                         }
-                                    } 
-                                    %>
+                                    } else { %>
+                                        <tr>
+                                            <td colspan="8" class="no-data-message">
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                No feedback data available at the moment.
+                                            </td>
+                                        </tr>
+                                    <% } %>
                                 </tbody>
                             </table>
                         </div>
@@ -614,6 +633,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Debug: Check if the page loaded correctly
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded successfully');
+            console.log('Feedback table element:', document.getElementById('feedbackTable'));
+            console.log('Feedback list size:', <%= feedbackList != null ? feedbackList.size() : 0 %>);
+        });
+        
         function deleteFeedback(id) {
             if (confirm('Are you sure you want to delete this feedback?')) {
                 window.location.href = '/feedback/delete/' + id;
