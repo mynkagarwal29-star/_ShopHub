@@ -11,13 +11,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.jpa.dao.CatDao;
 import com.example.jpa.dao.ProductDao;
@@ -36,49 +36,54 @@ public class CatController {
     private static final String Upload_DIR="uploads/";
     
     @PostMapping("/addCategory")
-    public String addCategory(@ModelAttribute("cat") Category cat, 
-                             @RequestParam("file") MultipartFile file,
-                             ModelMap model) {
-        if(file.isEmpty()) {
-            model.put("msg", "Please upload a file!");
-            return "error";
-        }
+    public String addCategory(
+            @ModelAttribute("cat") Category cat,
+            @RequestParam("file") MultipartFile file,
+            RedirectAttributes redirectAttrs) {
+
         try {
-            // Ensure Directory is present as in the upload_dr else make one
+            // Ensure upload directory exists
             File dir = new File(Upload_DIR);
-            if(!dir.exists()) {
+            if (!dir.exists()) {
                 dir.mkdirs();
             }
-            
+
+            // Validate category name
             if (cd.existsByCategory(cat.getCategory())) {
-                model.put("error", "Category already exists!");
-                return "error";
+                redirectAttrs.addFlashAttribute("error", "Category already exists!");
+                return "redirect:/Category";
             }
-            
-            // Saving the file
+
+            // Handle file upload
+            if (file.isEmpty()) {
+                redirectAttrs.addFlashAttribute("error", "Please upload an image!");
+                return "redirect:/Category";
+            }
+
             String fileName = file.getOriginalFilename();
-            if (fileName != null && !fileName.isEmpty()) {
-                Path path = Paths.get(Upload_DIR, fileName);
-                Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                // Save the name in db
-                cat.setImage(fileName);
-            } else {
-                model.put("error", "Invalid file selected.");
-                return "error";
+            if (fileName == null || fileName.isEmpty()) {
+                redirectAttrs.addFlashAttribute("error", "Invalid file name.");
+                return "redirect:/Category";
             }
-            
-            // Save category to db
+
+            Path path = Paths.get(Upload_DIR, fileName);
+            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+            cat.setImage(fileName);
+
+            // Save category
             cd.save(cat);
-            model.put("added", "Category Added!");
-            return "redirect:Category";
+
+            redirectAttrs.addFlashAttribute("success", "Category added successfully!");
+            return "redirect:/Category";
+
         } catch (IOException e) {
             e.printStackTrace();
-            model.addAttribute("error", "Failed to save file: " + e.getMessage());
-            return "error";
+            redirectAttrs.addFlashAttribute("error", "File upload failed: " + e.getMessage());
+            return "redirect:/Category";
         } catch (Exception e) {
             e.printStackTrace();
-            model.addAttribute("error", "Unexpected error occurred: " + e.getMessage());
-            return "error";
+            redirectAttrs.addFlashAttribute("error", "Unexpected error: " + e.getMessage());
+            return "redirect:/Category";
         }
     }
     
@@ -139,43 +144,48 @@ public class CatController {
     }
     
     @PostMapping("/updateCategory")
-    public String updateCategory(@ModelAttribute("cat") Category cat,
-                               @RequestParam("file") MultipartFile file,
-                               HttpServletRequest request) {
+    public String updateCategory(
+            @ModelAttribute("cat") Category cat,
+            @RequestParam("file") MultipartFile file,
+            RedirectAttributes redirectAttrs) {
+
         try {
             // Fetch the existing category from DB
-            Category existing = cd.findById(cat.getId()).orElseThrow();
+            Category existing = cd.findById(cat.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Category not found for ID: " + cat.getId()));
+
             String oldName = existing.getCategory();
 
             // Handle file upload
             if (!file.isEmpty()) {
                 String fileName = file.getOriginalFilename();
-                Path path = Paths.get(Upload_DIR, fileName);
-                Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                cat.setImage(fileName);
+                if (fileName != null && !fileName.isEmpty()) {
+                    Path path = Paths.get(Upload_DIR, fileName);
+                    Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+                    cat.setImage(fileName);
+                }
             } else {
-                // Keep old image
+                // Keep old image if no new one is uploaded
                 cat.setImage(existing.getImage());
             }
 
-            // Save the updated category
+            // Save updated category
             cd.save(cat);
 
-            // Update products that have the old category name
+            // Update products using the old category name
             List<Product> products = pd.findByCategory(oldName);
             for (Product p : products) {
                 p.setCategory(cat.getCategory());
             }
             pd.saveAll(products);
 
-            // Success message
-            request.setAttribute("success", "Category updated successfully!");
-            return "redirect:Category";
+            redirectAttrs.addFlashAttribute("success", "Category updated successfully!");
+            return "redirect:/Category";
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Error updating category: " + e.getMessage());
-            return "error";
+            redirectAttrs.addFlashAttribute("error", "Error updating category: " + e.getMessage());
+            return "redirect:/Category";
         }
     }
 
