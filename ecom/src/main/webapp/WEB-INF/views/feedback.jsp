@@ -479,7 +479,7 @@
                     </div>
                     <div class="card-body p-0">
                         <div class="table-container">
-                            <table class="table table-hover mb-0" id="feedbackTable">
+                           <table class="table table-hover mb-0" id="feedbackTable">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -505,19 +505,21 @@
                                             String customerName = feedback.getAccount().getName();
                                             
                                             // Order ID
-                                            String orderId = "Order #" + feedback.getOrder().getId();                                           
+                                            String orderId = "Order #" + feedback.getOrder().getId();
+                                            String status = feedback.getOrder().getDelivery_status();
                                     %>
                                         <tr data-rating="<%= feedback.getRating() %>">
                                             <td><%= feedbackId %></td>
                                             <td><%= customerName %></td>
-                                            <td><% if (feedback.getOrder() != null) { %>
-                                                    <a href="AdminSideOrder?userId=<%= feedback.getOrder().getAccount().getId() %>&userName=<%= java.net.URLEncoder.encode(feedback.getOrder().getAccount().getName(), "UTF-8") %>" 
-                                                       style="color: #007bff; text-decoration: none; font-weight: bold; padding: 5px 10px; border: 1px solid #007bff; border-radius: 4px; display: inline-block;">
-                                                        <%= orderId %>
-                                                    </a>
-                                                <% } else { %>
-                                                    <%= orderId %>
-                                                <% } %></td>
+                                            
+                                 	    <td>
+										    <a href="AdminSideOrder?userId=<%= feedback.getOrder().getAccount().getId() %>&userName=<%= java.net.URLEncoder.encode(feedback.getOrder().getAccount().getName(), "UTF-8") %>" 
+										       style="color: #007bff; text-decoration: none; font-weight: bold; padding: 5px 10px; border: 1px solid #007bff; border-radius: 4px; display: inline-block;">
+										        <%= orderId %>
+										    </a>
+										</td>
+
+
                                             <td>
                                                 <div class="rating">
                                                     <% for (int i = 1; i <= 5; i++) { %>
@@ -527,26 +529,18 @@
                                             </td>
                                             <td class="feedback-message"><%= feedback.getComment() %></td>
                                             <td><%= dateStr %></td>
-                                           <td>
-											    <% 
-											        String status = "Unknown";
-											        if (feedback.getOrder() != null && feedback.getOrder().getDelivery_status() != null) {
-											            status = feedback.getOrder().getDelivery_status();
-											        }
-											    %>
-											    <span class="badge bg-success"><%= status %></span>
-											</td>
+                                            <td><span class="badge bg-success"><%= status %></span></td>
                                             <td class="actions">
-                                               <button class="btn edit-btn" onclick="viewFeedback(
-												    '<%= feedbackId %>',
-												    '<%= StringEscapeUtils.escapeEcmaScript(customerName) %>',
-												    '<%= StringEscapeUtils.escapeEcmaScript(orderId) %>',
-												    <%= feedback.getRating() %>,
-												    '<%= StringEscapeUtils.escapeEcmaScript(feedback.getComment()) %>',
-												    '<%= dateStr %>'
-												)">
-												    <i class="bi bi-eye"></i>
-												</button>
+                                                <button class="btn edit-btn" onclick="viewFeedback(
+                                                    '<%= feedbackId %>',
+                                                    '<%= customerName %>',
+                                                    '<%= orderId %>',
+                                                    <%= feedback.getRating() %>,
+                                                    '<%= feedback.getComment() %>',
+                                                    '<%= dateStr %>'
+                                                )">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
                                                 <button class="btn delete-btn" onclick="deleteFeedback(<%= feedback.getId() %>)">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
@@ -554,14 +548,8 @@
                                         </tr>
                                     <% 
                                         }
-                                    } else { %>
-                                        <tr>
-                                            <td colspan="8" class="no-data-message">
-                                                <i class="bi bi-info-circle me-2"></i>
-                                                No feedback data available at the moment.
-                                            </td>
-                                        </tr>
-                                    <% } %>
+                                    } 
+                                    %>
                                 </tbody>
                             </table>
                         </div>
@@ -633,16 +621,7 @@
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Debug: Check if the page loaded correctly
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded successfully');
-            console.log('Feedback table element:', document.getElementById('feedbackTable'));
-            console.log('Feedback list size:', <%= feedbackList != null ? feedbackList.size() : 0 %>);
-        });
-        
         function deleteFeedback(id) {
             if (confirm('Are you sure you want to delete this feedback?')) {
                 window.location.href = '/feedback/delete/' + id;
@@ -688,5 +667,7 @@
             });
         });
     </script>
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
 </body>
 </html>

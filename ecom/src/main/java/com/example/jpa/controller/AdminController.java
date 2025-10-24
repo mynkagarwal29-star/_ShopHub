@@ -141,10 +141,10 @@ public class AdminController {
         avgRating = Math.round(avgRating * 10) / 10.0;
 
        
-		request.setAttribute("feedbackList", feedbackList);
-        request.setAttribute("totalReviews", totalReviews);
-        request.setAttribute("avgRating", avgRating);
-        request.setAttribute("fiveStarReviews", fiveStarReviews);
+		model.addAttribute("feedbackList", feedbackList);
+		model.addAttribute("totalReviews", totalReviews);
+		model.addAttribute("avgRating", avgRating);
+		model.addAttribute("fiveStarReviews", fiveStarReviews);
         
         return "feedback";
     }
