@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -23,6 +24,9 @@ public class Order {
     private Long id;
     @ManyToOne
     private Account account;
+    @OneToOne(mappedBy = "order", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Feedback feedback;
+
     // Instead of Address entity, we embed fields directly here
     private String line1;
     private LocalDateTime orderDate;
