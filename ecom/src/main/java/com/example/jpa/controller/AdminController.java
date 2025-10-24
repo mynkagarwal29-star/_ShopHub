@@ -120,34 +120,39 @@ public class AdminController {
   */  
     // Admin-only: list all feedback
     @GetMapping("/feed")
-    public String listAllFeedback(Model model, HttpSession session, HttpSession request) {
+    public String listAllFeedback(Model model, HttpSession session) {
         Account user = (Account) session.getAttribute("currentUser");
         if (user == null || !user.getRole().equalsIgnoreCase("ADMIN")) {
             return "redirect:/log";
         }
 
         List<Feedback> feedbackList = feedbackService.getAllFeedbacks();
-        //model.addAttribute("feedbackList", feedbackList);
+
         int totalReviews = feedbackList.size();
         double avgRating = 0;
         int fiveStarReviews = 0;
+        int unresolvedCount = 0;
 
         if (totalReviews > 0) {
             double sum = feedbackList.stream().mapToInt(Feedback::getRating).sum();
             avgRating = sum / totalReviews;
             fiveStarReviews = (int) feedbackList.stream().filter(f -> f.getRating() == 5).count();
+            unresolvedCount = (int) feedbackList.stream()
+                .filter(f -> !"resolved".equalsIgnoreCase(f.getOrder().getDelivery_status()))
+                .count();
         }
 
         avgRating = Math.round(avgRating * 10) / 10.0;
 
-       
-		model.addAttribute("feedbackList", feedbackList);
-		model.addAttribute("totalReviews", totalReviews);
-		model.addAttribute("avgRating", avgRating);
-		model.addAttribute("fiveStarReviews", fiveStarReviews);
-        
+        model.addAttribute("feedbackList", feedbackList);
+        model.addAttribute("totalReviews", totalReviews);
+        model.addAttribute("avgRating", avgRating);
+        model.addAttribute("fiveStarReviews", fiveStarReviews);
+        model.addAttribute("unresolvedCount", unresolvedCount);
+
         return "feedback";
     }
+
 
     @GetMapping("/viewOrder/{id}")
     public String viewOrder(
