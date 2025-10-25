@@ -93,16 +93,35 @@ public class OrderController {
 
     
     @GetMapping("/order/orderconfirm")
-    public String confirmationPage(@RequestParam Long orderId, Model model) {
-        Order order = orderService.getOrderById(orderId);
-        model.addAttribute("order", order);
-        cartService.clearCart(order.getAccount());
-        
-        boolean feedbackExists = feedbackService.feedbackExistsForOrder(orderId, order.getAccount().getId());
+    public String confirmationPage(@RequestParam Long orderId, Model model, HttpSession session) {
+        // 1️⃣ Check user session
+        Account user = (Account) session.getAttribute("currentUser");
+        if (user == null) {
+            return "redirect:/log"; // not logged in
+        }
+
+        // 2️⃣ Fetch order with items (same as orderDetails)
+        Order order = orderService.getOrderWithItems(orderId);
+        if (order == null || order.getAccount() == null || !Objects.equals(order.getAccount().getId(), user.getId())) {
+            return "redirect:/"; // invalid access
+        }
+
+        // 3️⃣ Clear cart after successful order
+        cartService.clearCart(user);
+
+        // 4️⃣ Feedback info
+        boolean feedbackExists = feedbackService.feedbackExistsForOrder(orderId, user.getId());
         model.addAttribute("feedbackExists", feedbackExists);
-        
-        return "orderconfirm";  // the JSP name for your confirmation page
+
+        // 5️⃣ Add attributes (same as orderDetails)
+        model.addAttribute("order", order);
+        model.addAttribute("orderItems", order.getItems());
+        model.addAttribute("orderSize", order.getItems().size());
+
+        // 6️⃣ Return the same JSP
+        return "orderconfirm";
     }
+
     
     @GetMapping("/orders/edit")
     public String editOrder(
