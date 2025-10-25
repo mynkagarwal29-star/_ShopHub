@@ -26,7 +26,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+	
     <style>
         /* GLOBAL THEME COLORS */
         :root {
@@ -308,9 +308,22 @@
                             <td><%= dateStr %></td>
                             <td><span class="badge bg-success"><%= status %></span></td>
                             <td class="actions">
-                                <button class="btn edit-btn" onclick="viewFeedback('<%= feedbackId %>','<%= customerName %>','<%= orderId %>',<%= feedback.getRating() %>,'<%= feedback.getComment() %>','<%= dateStr %>')">
-                                    <i class="bi bi-eye"></i>
-                                </button>
+                                   <button class="btn edit-btn"
+						        onclick="viewFeedback(
+						            '<%= feedbackId %>',
+						            '<%= customerName.replace("'", "\\'").replace("\"", "\\\"") %>',
+						            '<%= orderId.replace("'", "\\'").replace("\"", "\\\"") %>',
+						            <%= feedback.getRating() %>,
+						            '<%= feedback.getComment()
+						                .replace("\\", "\\\\")
+						                .replace("'", "\\'")
+						                .replace("\"", "\\\"")
+						                .replace("\n", "\\n")
+						                .replace("\r", "") %>',
+						            '<%= dateStr.replace("'", "\\'").replace("\"", "\\\"") %>'
+						        )">
+						        <i class="bi bi-eye"></i>
+						    </button>
                                 <button class="btn delete-btn" onclick="deleteFeedback(<%= feedback.getId() %>)">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -328,24 +341,59 @@
 </div>
 
 <!-- MODAL -->
+<!-- Feedback Details Modal -->
 <div class="modal fade" id="viewFeedbackModal" tabindex="-1" aria-labelledby="viewFeedbackModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Feedback Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      
+      <div class="modal-header bg-primary text-white rounded-top-4">
+        <h5 class="modal-title d-flex align-items-center">
+          <i class="bi bi-chat-dots-fill me-2"></i> Feedback Details
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <div class="row mb-2"><div class="col-4 fw-bold">Feedback ID:</div><div class="col-8" id="modalFeedbackId"></div></div>
-        <div class="row mb-2"><div class="col-4 fw-bold">Customer:</div><div class="col-8" id="modalCustomer"></div></div>
-        <div class="row mb-2"><div class="col-4 fw-bold">Order:</div><div class="col-8" id="modalOrder"></div></div>
-        <div class="row mb-2"><div class="col-4 fw-bold">Rating:</div><div class="col-8" id="modalRating" class="rating"></div></div>
-        <div class="row mb-2"><div class="col-4 fw-bold">Date:</div><div class="col-8" id="modalDate"></div></div>
-        <div class="row mt-3"><div class="col-12"><div class="fw-bold mb-1">Comment:</div><div id="modalComment" class="p-3 bg-light border rounded"></div></div></div>
+
+      <div class="modal-body p-4">
+        <div class="row mb-3">
+          <div class="col-4 fw-semibold text-secondary">Feedback ID:</div>
+          <div class="col-8" id="modalFeedbackId"></div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-4 fw-semibold text-secondary">Customer:</div>
+          <div class="col-8" id="modalCustomer"></div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-4 fw-semibold text-secondary">Order:</div>
+          <div class="col-8">
+            <button id="modalOrderBtn" class="btn btn-outline-primary btn-sm fw-semibold">
+              <i class="bi bi-box-seam me-1"></i>
+              <span id="modalOrder"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="row mb-3 align-items-center">
+          <div class="col-4 fw-semibold text-secondary">Rating:</div>
+          <div class="col-8" id="modalRating" class="rating text-warning fs-5"></div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-4 fw-semibold text-secondary">Date:</div>
+          <div class="col-8" id="modalDate"></div>
+        </div>
+
+        <div class="mt-4">
+          <div class="fw-semibold text-secondary mb-2">Comment:</div>
+          <div id="modalComment" class="p-3 bg-light border rounded-3"></div>
+        </div>
       </div>
+
     </div>
   </div>
 </div>
+
 
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -362,11 +410,22 @@
         document.getElementById('modalOrder').textContent = order;
         document.getElementById('modalDate').textContent = date;
         document.getElementById('modalComment').textContent = comment;
+
+        // ✅ Convert rating to number to avoid blank stars
+        rating = parseInt(rating) || 0;
+
+        // Build star icons correctly
         let stars = '';
-        for (let i = 1; i <= 5; i++) stars += `<i class="bi bi-star${i <= rating ? '-fill' : ''}"></i>`;
+        for (let i = 1; i <= 5; i++) {
+            stars += `<i class="bi bi-star${i <= rating ? '-fill' : ''} text-warning"></i>`;
+        }
+
         document.getElementById('modalRating').innerHTML = stars;
+
+        // Show the modal
         new bootstrap.Modal(document.getElementById('viewFeedbackModal')).show();
     }
+
 
     document.getElementById('ratingFilter').addEventListener('change', function() {
         const value = this.value;
