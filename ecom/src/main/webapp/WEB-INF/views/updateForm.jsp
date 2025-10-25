@@ -83,24 +83,24 @@ Account currentUser = (Account) session.getAttribute("currentUser");
                             <i class="fas fa-shopping-bag me-2"></i>ShopHub
                          </a>
                     </div>
-                    <small class="text-muted">
-  Search looks through both product names and descriptions — try specific keywords for better accuracy.
-</small>
-                    
-                     <!-- User Info Section (Logged In As) -->
-    <div class="d-flex align-items-center">
-        <%
-            String userEmail = currentUser.getEmail();
-            if (userEmail != null) {
-        %>
-            <!-- Show logged-in email -->
-            <div class="d-flex align-items-center">
-                <span class="me-3">Logged in as: <strong><%= userEmail %></strong></span>
-            </div>
-        <%
-            }
-        %>
-    </div>
+                    <small class="text-danger">
+				  Search looks through both product names and descriptions — try specific keywords for better accuracy.
+				</small>
+				                    
+				                     <!-- User Info Section (Logged In As) -->
+				    <div class="d-flex align-items-center">
+				        <%
+				            String userEmail = currentUser.getEmail();
+				            if (userEmail != null) {
+				        %>
+				            <!-- Show logged-in email -->
+				            <div class="d-flex align-items-center">
+				                <span class="me-3">Logged in as: <strong><%= userEmail %></strong></span>
+				            </div>
+				        <%
+				            }
+				        %>
+				    </div>
                 </div>
 
                 <!-- Update Product Form -->

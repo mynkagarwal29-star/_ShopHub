@@ -74,33 +74,33 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <!-- Topbar (same as dashboard) -->
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+ <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <button class="btn btn-link d-md-none" type="button" data-bs-toggle="collapse" data-bs-target=".sidebar">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <div class="input-group" style="max-width: 300px;">
-                        <a class="navbar-brand" href="#">
-            			    <i class="fas fa-shopping-bag me-2"></i>ShopHub
-         			    </a>
+                    <div>
+                       <a class="navbar-brand" href="#">
+                            <i class="fas fa-shopping-bag me-2"></i>ShopHub
+                         </a>
                     </div>
-                    <small class="text-muted">
-  Search looks through both product names and descriptions — try specific keywords for better accuracy.
-</small>
-                    
-                    <!-- User Info Section (Logged In As) -->
-    <div class="d-flex align-items-center">
-        <%
-            String userEmail = currentUser.getEmail();
-            if (userEmail != null) {
-        %>
-            <!-- Show logged-in email -->
-            <div class="d-flex align-items-center">
-                <span class="me-3">Logged in as: <strong><%= userEmail %></strong></span>
-            </div>
-        <%
-            }
-        %>
-    </div>
+                    <small class="text-danger">
+				  Search looks through both product names and descriptions — try specific keywords for better accuracy.
+				</small>
+				                    
+				                     <!-- User Info Section (Logged In As) -->
+				    <div class="d-flex align-items-center">
+				        <%
+				            String userEmail = currentUser.getEmail();
+				            if (userEmail != null) {
+				        %>
+				            <!-- Show logged-in email -->
+				            <div class="d-flex align-items-center">
+				                <span class="me-3">Logged in as: <strong><%= userEmail %></strong></span>
+				            </div>
+				        <%
+				            }
+				        %>
+				    </div>
                 </div>
 
                 <!-- Add Product Form -->
