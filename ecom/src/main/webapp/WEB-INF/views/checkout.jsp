@@ -146,7 +146,7 @@
         }).then(res => {
             if(res.ok){
                 setTimeout(() => {
-                    window.location.href = "/order/orderconfirm?orderId=" + <%= orderId %>;
+                    window.location.href = "/order/details?id=" + <%= orderId %>;
                 }, 2000);
             } else {
                 showFailure();
