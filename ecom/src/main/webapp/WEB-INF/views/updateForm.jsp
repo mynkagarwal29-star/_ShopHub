@@ -33,37 +33,37 @@ Account currentUser = (Account) session.getAttribute("currentUser");
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/viewitem">
+                            <a class="nav-link text-white" href="#">
                                 <i class="fas fa-home me-2"></i> EDIT MODE
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/addForm">
+                            <a class="nav-link text-white" href="#">
                                 <i class="fas fa-plus-circle me-2"></i> HERE YOU CAN
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/Category">
+                            <a class="nav-link text-white" href="#">
                                 <i class="fas fa-plus-circle me-2"></i> ONLY EDIT
                             </a>
                         </li>
                       <li class="nav-item">
-                            <a class="nav-link text-white" href="trainer">
+                            <a class="nav-link text-white" href="#">
                                 <i class="fas fa-users me-2"></i> PRODUCT
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="AdminSideOrder">
+                            <a class="nav-link text-white" href="#">
                                 <i class="fas fa-shopping-bag me-2"></i> AND LEAVE
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="feed">
+                            <a class="nav-link text-white" href="#">
                                 <i class="fas fa-comments me-2"></i> AFTER 
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="./Login.jsp">
+                            <a class="nav-link text-white" href="#">
                                 <i class="fas fa-sign-out-alt me-2"></i> SAVING IT
                             </a>
                         </li>
