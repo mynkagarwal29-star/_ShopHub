@@ -15,7 +15,7 @@ Account currentUser = (Account) session.getAttribute("currentUser");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Product - Admin Dashboard</title>
+    <title>Update Product - Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/FORM.css">
@@ -83,6 +83,10 @@ Account currentUser = (Account) session.getAttribute("currentUser");
                             <i class="fas fa-shopping-bag me-2"></i>ShopHub
                          </a>
                     </div>
+                    <small class="text-muted">
+  Search looks through both product names and descriptions — try specific keywords for better accuracy.
+</small>
+                    
                      <!-- User Info Section (Logged In As) -->
     <div class="d-flex align-items-center">
         <%

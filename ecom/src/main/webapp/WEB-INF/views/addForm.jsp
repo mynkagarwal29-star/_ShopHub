@@ -83,6 +83,10 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
             			    <i class="fas fa-shopping-bag me-2"></i>ShopHub
          			    </a>
                     </div>
+                    <small class="text-muted">
+  Search looks through both product names and descriptions — try specific keywords for better accuracy.
+</small>
+                    
                     <!-- User Info Section (Logged In As) -->
     <div class="d-flex align-items-center">
         <%
