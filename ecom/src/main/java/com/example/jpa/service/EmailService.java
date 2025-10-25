@@ -17,7 +17,7 @@ public class EmailService {
 
     // Keep method signature same
     public void sendSimpleMail(String to, String subject, String text) {
-        Email from = new Email("your_verified_sender@example.com"); // must match your SendGrid verified sender
+        Email from = new Email("mynk.agarwal29@gmail.com"); // must match your SendGrid verified sender
         Email toEmail = new Email(to);
         Content content = new Content("text/plain", text);
         Mail mail = new Mail(from, subject, toEmail, content);
