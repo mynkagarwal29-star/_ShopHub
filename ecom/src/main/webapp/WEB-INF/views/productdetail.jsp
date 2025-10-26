@@ -806,100 +806,90 @@ footer, .footer {
             </div>
             <!-- Product Detail -->
             <div class="product-card">
-                    <%
-                          if(prod!=null)
-                        {
-                    %>
-                <div class="row">
-                    <!-- Product Images -->
-                    <div class="col-lg-5 product-images">
-                        <img src="/uploads/<%= prod.getImagePath() %>" class="main-image" id="mainProductImage" alt="<%= prod.getName() %>">
-                    </div>
-                    
-                    <!-- Product Info -->
-                    <div class="col-lg-7">
-                        <h1 class="product-title"><%= prod.getName() %></h1>
-                        
-                        <div class="product-price">
-                            <span class="price-current">₹<%= prod.getPrice() %></span>
-                         </div>
-                        
-                        <div class="product-description">
-                            <p><%= prod.getDescription() %></p>
-                        </div>
-                       
-                     <div class="product-actions">
-<%
-    int qty = prod.getQuantity();
-    if (qty == 0) {
+                   <%
+if(prod != null) {
 %>
-    <span class="badge bg-danger d-block mb-2">Out of Stock</span>
-<% 
-    } else if (qty < 6) { 
-%>
-    <span class="badge bg-danger d-block mb-2">Hurry! Only <%= qty %> left!</span>
-<%
-    }
-%> 
-<% if (qty > 0) { %>
-    <% if(currentUser != null){ %>
-        <!-- Logged-in user -->
-        <form action="${pageContext.request.contextPath}/cart/add" method="post" style="display:inline-block; margin-right:8px;">
-            <input type="hidden" name="accountId" value="<%= userId %>">
-            <input type="hidden" name="productId" value="<%= prod.getId() %>">
-            <input type="hidden" name="qty" value="1">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-shopping-cart me-2"></i> Add to Cart
-            </button>
-        </form>
-        <form action="<%= request.getContextPath() %>/cart/buy-now" method="post" style="display:inline-block;">
-            <input type="hidden" name="accountId" value="<%= userId %>">
-            <input type="hidden" name="productId" value="<%= prod.getId() %>">
-            <input type="hidden" name="qty" value="1">
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-bolt me-2"></i> Buy Now
-            </button>
-        </form>
-    <% } else { %>
-        <!-- Guest user -->
-        <form action="${pageContext.request.contextPath}/cart/add" method="post" style="display:inline-block; margin-right:8px;">
-            <input type="hidden" name="productId" value="<%= prod.getId() %>">
-            <input type="hidden" name="qty" value="1">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-shopping-cart me-2"></i> Add to Cart
-            </button>
-        </form>
-        <form action="${pageContext.request.contextPath}/cart/buy-now" method="post" style="display:inline-block;">
-            <input type="hidden" name="productId" value="<%= prod.getId() %>">
-            <input type="hidden" name="qty" value="1">
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-bolt me-2"></i> Buy Now
-            </button>
-        </form>
-        <small class="text-muted d-block">Use cart but Login to purchase</small>
-    <% } %>
-    <% } %>
+<div class="row">
+    <!-- Product Images -->
+    <div class="col-lg-5 product-images">
+        <img src="/uploads/<%= prod.getImagePath() %>" class="main-image" id="mainProductImage" alt="<%= prod.getName() %>">
+    </div>
+
+    <!-- Product Info -->
+    <div class="col-lg-7">
+        <h1 class="product-title"><%= prod.getName() %></h1>
+
+        <div class="product-price">
+            <span class="price-current">₹<%= prod.getPrice() %></span>
+        </div>
+
+        <div class="product-actions mb-3">
+            <%
+                int qty = prod.getQuantity();
+                if (qty == 0) {
+            %>
+                <span class="badge bg-danger d-block mb-2">Out of Stock</span>
+            <%
+                } else if (qty < 6) { 
+            %>
+                <span class="badge bg-danger d-block mb-2">Hurry! Only <%= qty %> left!</span>
+            <%
+                }
+            %>
+
+            <% if (qty > 0) { %>
+                <% if(currentUser != null) { %>
+                    <!-- Logged-in user -->
+                    <form action="${pageContext.request.contextPath}/cart/add" method="post" style="display:inline-block; margin-right:8px;">
+                        <input type="hidden" name="accountId" value="<%= userId %>">
+                        <input type="hidden" name="productId" value="<%= prod.getId() %>">
+                        <input type="number" name="qty" value="1" min="1" max="<%= qty %>" style="width:60px;" required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-shopping-cart me-2"></i> Add to Cart
+                        </button>
+                    </form>
+                    <form action="<%= request.getContextPath() %>/cart/buy-now" method="post" style="display:inline-block;">
+                        <input type="hidden" name="accountId" value="<%= userId %>">
+                        <input type="hidden" name="productId" value="<%= prod.getId() %>">
+                        <input type="number" name="qty" value="1" min="1" max="<%= qty %>" style="width:60px;" required>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-bolt me-2"></i> Buy Now
+                        </button>
+                    </form>
+                <% } else { %>
+                    <!-- Guest user -->
+                    <form action="${pageContext.request.contextPath}/cart/add" method="post" style="display:inline-block; margin-right:8px;">
+                        <input type="hidden" name="productId" value="<%= prod.getId() %>">
+                        <input type="number" name="qty" value="1" min="1" max="<%= qty %>" style="width:60px;" required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-shopping-cart me-2"></i> Add to Cart
+                        </button>
+                    </form>
+                    <form action="${pageContext.request.contextPath}/cart/buy-now" method="post" style="display:inline-block;">
+                        <input type="hidden" name="productId" value="<%= prod.getId() %>">
+                        <input type="number" name="qty" value="1" min="1" max="<%= qty %>" style="width:60px;" required>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-bolt me-2"></i> Buy Now
+                        </button>
+                    </form>
+                    <small class="text-muted d-block mt-1">Use cart but login to complete purchase</small>
+                <% } %>
+            <% } %>
+        </div>
+	  <!-- Optional Message below description -->
+        <div class="mt-3 text-info">
+            <small>Adjust the quantity in the cart section!</small>
+        </div>
+        <!-- Product Description -->
+        <div class="product-description">
+            <p><%= prod.getDescription() %></p>
+        </div>
+    </div>
 </div>
-                        
-                      <!--   <div class="product-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-truck"></i>
-                                <span>Free shipping on orders over $50</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-shield-alt"></i>
-                                <span>2-year warranty included</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-undo-alt"></i>
-                                <span>30-day return policy</span>
-                            </div>
-                        </div> -->
-                    </div>
-                </div>
-                        <% 
-                        }
-                        %>
+<%
+}
+%>
+
                         <!-- Related Products -->
                        <div class="related-products">
     <h3 class="section-title">Related Products</h3>
