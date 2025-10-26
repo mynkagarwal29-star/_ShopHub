@@ -291,12 +291,15 @@
                         <tr data-rating="<%= feedback.getRating() %>">
                             <td><%= feedbackId %></td>
                             <td><%= customerName %></td>
+                            
                             <td>
-                                <a href="AdminSideOrder?userId=<%= feedback.getOrder().getAccount().getId() %>&userName=<%= java.net.URLEncoder.encode(feedback.getOrder().getAccount().getName(), "UTF-8") %>"
-                                   class="text-decoration-none fw-bold text-primary">
-                                    <%= orderId %>
-                                </a>
-                            </td>
+							    <a href="AdminSideOrder?userId=<%= feedback.getOrder().getAccount().getId() %>&userName=<%= java.net.URLEncoder.encode(feedback.getOrder().getAccount().getName(), "UTF-8") %>"
+							       class="btn btn-outline-primary btn-sm fw-semibold text-decoration-none">
+							        <i class="bi bi-box-seam me-1"></i>
+							        <%= orderId %>
+							    </a>
+							</td>
+
                             <td>
                                 <div class="rating">
                                     <% for (int i = 1; i <= 5; i++) { %>
@@ -412,7 +415,7 @@
         document.getElementById('modalComment').textContent = comment;
 
         // ✅ Convert rating to number to avoid blank stars
-        rating = parseInt(rating) || 0;
+        rating = Number(rating?.toString().trim()) || 0;
 
         // Build star icons correctly
         let stars = '';
