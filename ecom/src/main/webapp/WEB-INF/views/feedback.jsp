@@ -185,23 +185,23 @@
             border-radius: 10px;
             border: none;
         }
-        .star {
-  font-size: 1.5rem;        /* Adjust size */
-  color: #ffc107;           /* Bootstrap yellow (gold) */
-  margin-right: 4px;        /* Space between stars */
-  transition: transform 0.2s ease, color 0.2s ease;
-  cursor: pointer;          /* Optional: make clickable */
-}
-
-.star:hover {
-  transform: scale(1.2);
-  color: #ffcd39;           /* Slightly lighter gold on hover */
-}
-
-#rating {
-  display: inline-flex;
-  align-items: center;
-}
+			        .star {
+			  font-size: 1.5rem;        /* Adjust size */
+			  color: #ffc107;           /* Bootstrap yellow (gold) */
+			  margin-right: 4px;        /* Space between stars */
+			  transition: transform 0.2s ease, color 0.2s ease;
+			  cursor: pointer;          /* Optional: make clickable */
+			}
+			
+			.star:hover {
+			  transform: scale(1.2);
+			  color: #ffcd39;           /* Slightly lighter gold on hover */
+			}
+			
+			#rating {
+			  display: inline-flex;
+			  align-items: center;
+			}
         
     </style>
 </head>
@@ -433,15 +433,16 @@
         document.getElementById('modalComment').textContent = comment;
 
      // Generate star rating HTML
-        let ratingHtml = '';
-        for (let i = 1; i <= 5; i++) {
-            if (i <= rating) {
-                ratingHtml += '<i class="bi bi-star-fill"></i>';
-            } else {
-                ratingHtml += '<i class="bi bi-star"></i>';
-            }
-        }
-        document.getElementById('modalRating').innerHTML = ratingHtml;
+       let ratingHtml = '';
+for (let i = 1; i <= 5; i++) {
+    if (i <= rating) {
+        ratingHtml += '<i class="bi bi-star-fill star"></i>';
+    } else {
+        ratingHtml += '<i class="bi bi-star star"></i>';
+    }
+}
+document.getElementById('modalRating').innerHTML = ratingHtml;
+
         // Show the modal
         new bootstrap.Modal(document.getElementById('viewFeedbackModal')).show();
     }
