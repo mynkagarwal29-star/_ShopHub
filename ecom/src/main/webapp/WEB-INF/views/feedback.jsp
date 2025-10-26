@@ -316,7 +316,7 @@
 						            '<%= feedbackId %>',
 						            '<%= customerName.replace("'", "\\'").replace("\"", "\\\"") %>',
 						            '<%= orderId.replace("'", "\\'").replace("\"", "\\\"") %>',
-						           <%= (int) feedback.getRating() %>,
+						           <%= feedback.getRating() %>,
 						            '<%= feedback.getComment()
 						                .replace("\\", "\\\\")
 						                .replace("'", "\\'")
@@ -414,18 +414,16 @@
         document.getElementById('modalDate').textContent = date;
         document.getElementById('modalComment').textContent = comment;
 
-        // ✅ Convert rating to number to avoid blank stars
-        rating = parseInt(rating, 10) || 0;
-
-
-        // Build star icons correctly
-        let stars = '';
+     // Generate star rating HTML
+        let ratingHtml = '';
         for (let i = 1; i <= 5; i++) {
-            stars += `<i class="bi bi-star${i <= rating ? '-fill' : ''} text-warning"></i>`;
+            if (i <= rating) {
+                ratingHtml += '<i class="bi bi-star-fill"></i>';
+            } else {
+                ratingHtml += '<i class="bi bi-star"></i>';
+            }
         }
-
-        document.getElementById('modalRating').innerHTML = stars;
-
+        document.getElementById('modalRating').innerHTML = ratingHtml;
         // Show the modal
         new bootstrap.Modal(document.getElementById('viewFeedbackModal')).show();
     }
