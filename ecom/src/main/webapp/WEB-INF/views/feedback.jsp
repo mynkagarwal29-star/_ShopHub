@@ -415,7 +415,7 @@
         document.getElementById('modalComment').textContent = comment;
 
         // ✅ Convert rating to number to avoid blank stars
-        rating = Number(rating?.toString().trim()) || 0;
+        rating = Number(rating) ;
 
         // Build star icons correctly
         let stars = '';
