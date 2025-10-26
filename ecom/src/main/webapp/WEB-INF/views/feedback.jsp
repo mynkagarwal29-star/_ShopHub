@@ -316,7 +316,7 @@
 						            '<%= feedbackId %>',
 						            '<%= customerName.replace("'", "\\'").replace("\"", "\\\"") %>',
 						            '<%= orderId.replace("'", "\\'").replace("\"", "\\\"") %>',
-						            <%= feedback.getRating() %>,
+						           <%= (int) feedback.getRating() %>,
 						            '<%= feedback.getComment()
 						                .replace("\\", "\\\\")
 						                .replace("'", "\\'")
@@ -415,7 +415,8 @@
         document.getElementById('modalComment').textContent = comment;
 
         // ✅ Convert rating to number to avoid blank stars
-        rating = Number(rating) ;
+        rating = parseInt(rating, 10) || 0;
+
 
         // Build star icons correctly
         let stars = '';
