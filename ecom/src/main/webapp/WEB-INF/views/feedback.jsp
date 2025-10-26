@@ -185,6 +185,24 @@
             border-radius: 10px;
             border: none;
         }
+        .star {
+  font-size: 1.5rem;        /* Adjust size */
+  color: #ffc107;           /* Bootstrap yellow (gold) */
+  margin-right: 4px;        /* Space between stars */
+  transition: transform 0.2s ease, color 0.2s ease;
+  cursor: pointer;          /* Optional: make clickable */
+}
+
+.star:hover {
+  transform: scale(1.2);
+  color: #ffcd39;           /* Slightly lighter gold on hover */
+}
+
+#rating {
+  display: inline-flex;
+  align-items: center;
+}
+        
     </style>
 </head>
 <body>
