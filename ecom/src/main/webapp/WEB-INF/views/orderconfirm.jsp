@@ -655,61 +655,47 @@
         </div>
     </div>
 </div>
-<!-- Feedback Modal -->
-<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 shadow">
 
-      <div class="modal-header border-0">
-        <h5 class="modal-title fw-bold" id="feedbackModalLabel">Write Feedback</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <form id="feedbackForm" method="post" action="SubmitFeedback">
-        <div class="modal-body pt-0">
-          
-          <!-- Rating Section -->
-          <div class="mb-3 text-center">
-            <label class="form-label d-block mb-2">Rate your experience</label>
-            <div id="ratingStars" class="fs-3">
-              <i class="bi bi-star text-warning" data-value="1"></i>
-              <i class="bi bi-star text-warning" data-value="2"></i>
-              <i class="bi bi-star text-warning" data-value="3"></i>
-              <i class="bi bi-star text-warning" data-value="4"></i>
-              <i class="bi bi-star text-warning" data-value="5"></i>
+    <!-- Feedback Modal -->
+    <div class="modal fade feedback-modal" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feedbackModalLabel">Order Feedback</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="feedbackForm" action="/feedback/record" method="post">
+                        <input type="hidden" name="orderId" value="<%= order.getId() %>">
+                        
+                        <div class="mb-3">
+                            <label class="form-label rating-label">How would you rate your experience?</label>
+                            <div class="rating-container" id="ratingContainer">
+                                <i class="fas fa-star rating-star" data-rating="1"></i>
+                                <i class="fas fa-star rating-star" data-rating="2"></i>
+                                <i class="fas fa-star rating-star" data-rating="3"></i>
+                                <i class="fas fa-star rating-star" data-rating="4"></i>
+                                <i class="fas fa-star rating-star" data-rating="5"></i>
+                            </div>
+                            <input type="hidden" id="ratingValue" name="rating" value="0">
+                            <div class="rating-error">Please select a rating</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="comments" class="form-label">Comments (Optional)</label>
+                            <textarea class="form-control feedback-textarea" id="comments" name="comments" rows="3" placeholder="Share your experience with this order..."></textarea>
+                        </div>
+                         <div class="modal-footer">
+		                    <button type="reset" class="btn btn-secondary" >Cancel</button>
+		                    <button type="submit" class="btn btn-primary" >Submit Feedback</button>
+		                </div>
+                    </form>
+                </div>
+               
             </div>
-            <input type="hidden" id="rating" name="rating" value="0">
-          </div>
-
-          <!-- Comment Section with Character Counter -->
-          <div class="mb-3">
-            <label for="comments" class="form-label">Comments (Optional)</label>
-            <textarea 
-              class="form-control feedback-textarea" 
-              id="comments" 
-              name="comments" 
-              rows="3" 
-              maxlength="500" 
-              placeholder="Share your experience with this order..."
-            ></textarea>
-            <small id="charCount" class="text-muted d-block text-end mt-1">
-              500 characters remaining
-            </small>
-          </div>
-
-          <input type="hidden" name="orderId" id="orderId">
-
         </div>
-
-        <div class="modal-footer border-0">
-          <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary rounded-pill px-4">Submit</button>
-        </div>
-      </form>
-
     </div>
-  </div>
-</div>
+
     <!-- Thank You Modal -->
     <div class="modal fade thank-you-modal" id="thankYouModal" tabindex="-1" aria-labelledby="thankYouModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -795,33 +781,6 @@
             const ratingContainer = document.getElementById('ratingContainer');
             const ratingError = document.querySelector('.rating-error');
             const feedbackForm = document.getElementById('feedbackForm');
-            
-            
-            
-            
-            
-         // Real-time character counter for comments
-            const commentBox = document.getElementById('comments');
-            const charCount = document.getElementById('charCount');
-            const maxLength = parseInt(commentBox.getAttribute('maxlength'), 10);
-
-            commentBox.addEventListener('input', () => {
-                const remaining = maxLength - commentBox.value.length;
-                charCount.textContent = `${remaining} characters remaining`;
-
-                // Optional: turn red when near the limit
-                if (remaining <= 50) {
-                    charCount.classList.add('text-danger');
-                } else {
-                    charCount.classList.remove('text-danger');
-                }
-            });
-
-            
-            
-            
-            
-            
             const submitButton = document.getElementById('submitFeedback');
 
             // Handle star clicks
