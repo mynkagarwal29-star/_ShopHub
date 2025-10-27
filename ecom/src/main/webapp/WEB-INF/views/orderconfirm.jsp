@@ -656,45 +656,56 @@
     </div>
 </div>
 
-    <!-- Feedback Modal -->
-    <div class="modal fade feedback-modal" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="feedbackModalLabel">Order Feedback</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="feedbackForm" action="/feedback/record" method="post">
-                        <input type="hidden" name="orderId" value="<%= order.getId() %>">
-                        
-                        <div class="mb-3">
-                            <label class="form-label rating-label">How would you rate your experience?</label>
-                            <div class="rating-container" id="ratingContainer">
-                                <i class="fas fa-star rating-star" data-rating="1"></i>
-                                <i class="fas fa-star rating-star" data-rating="2"></i>
-                                <i class="fas fa-star rating-star" data-rating="3"></i>
-                                <i class="fas fa-star rating-star" data-rating="4"></i>
-                                <i class="fas fa-star rating-star" data-rating="5"></i>
-                            </div>
-                            <input type="hidden" id="ratingValue" name="rating" value="0">
-                            <div class="rating-error">Please select a rating</div>
+   
+<!-- Feedback Modal -->
+<div class="modal fade feedback-modal" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedbackModalLabel">Order Feedback</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="feedbackForm" action="/feedback/record" method="post">
+                    <input type="hidden" name="orderId" value="<%= order.getId() %>">
+
+                    <div class="mb-3">
+                        <label class="form-label rating-label">How would you rate your experience?</label>
+                        <div class="rating-container" id="ratingContainer">
+                            <i class="fas fa-star rating-star" data-rating="1"></i>
+                            <i class="fas fa-star rating-star" data-rating="2"></i>
+                            <i class="fas fa-star rating-star" data-rating="3"></i>
+                            <i class="fas fa-star rating-star" data-rating="4"></i>
+                            <i class="fas fa-star rating-star" data-rating="5"></i>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="comments" class="form-label">Comments (Optional)</label>
-                            <textarea class="form-control feedback-textarea" id="comments" name="comments" rows="3" placeholder="Share your experience with this order..."></textarea>
+                        <input type="hidden" id="ratingValue" name="rating" value="0">
+                        <div class="rating-error">Please select a rating</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="comments" class="form-label">Comments (Optional)</label>
+                        <textarea 
+                            class="form-control feedback-textarea" 
+                            id="comments" 
+                            name="comments" 
+                            rows="3" 
+                            maxlength="1000"
+                            placeholder="Share your experience with this order (max 1000 characters)..."></textarea>
+                        <div class="text-end mt-1">
+                            <small id="charCount" class="text-muted">0 / 1000</small>
                         </div>
-                         <div class="modal-footer">
-		                    <button type="reset" class="btn btn-secondary" >Cancel</button>
-		                    <button type="submit" class="btn btn-primary" >Submit Feedback</button>
-		                </div>
-                    </form>
-                </div>
-               
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submitFeedback">Submit Feedback</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+
 
     <!-- Thank You Modal -->
     <div class="modal fade thank-you-modal" id="thankYouModal" tabindex="-1" aria-labelledby="thankYouModalLabel" aria-hidden="true">
@@ -764,81 +775,82 @@
         </div>
     </footer>   
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-	/cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Show thank you modal if feedback was successfully submitted
-            const feedbackSuccess = <%= (feedbackSuccess != null && feedbackSuccess) ? "true" : "false" %>;
-            if (feedbackSuccess) {
-                const thankYouModal = new bootstrap.Modal(document.getElementById('thankYouModal'));
-                thankYouModal.show();
-            }
+   
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-            // Rating stars functionality
-            const stars = document.querySelectorAll('.rating-star');
-            const ratingValue = document.getElementById('ratingValue');
-            const ratingContainer = document.getElementById('ratingContainer');
-            const ratingError = document.querySelector('.rating-error');
-            const feedbackForm = document.getElementById('feedbackForm');
-            const submitButton = document.getElementById('submitFeedback');
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show thank you modal if feedback was successfully submitted
+    const feedbackSuccess = <%= (feedbackSuccess != null && feedbackSuccess) ? "true" : "false" %>;
+    if (feedbackSuccess) {
+        const thankYouModal = new bootstrap.Modal(document.getElementById('thankYouModal'));
+        thankYouModal.show();
+    }
 
-            // Handle star clicks
-            stars.forEach(star => {
-                star.addEventListener('click', function() {
-                    const rating = this.getAttribute('data-rating');
-                    ratingValue.value = rating;
-                    updateStars(rating);
-                    ratingContainer.classList.remove('error');
-                    ratingError.style.display = 'none';
-                });
+    // Rating stars functionality
+    const stars = document.querySelectorAll('.rating-star');
+    const ratingValue = document.getElementById('ratingValue');
+    const ratingContainer = document.getElementById('ratingContainer');
+    const ratingError = document.querySelector('.rating-error');
+    const feedbackForm = document.getElementById('feedbackForm');
+    const submitButton = document.getElementById('submitFeedback');
 
-                star.addEventListener('mouseover', function() {
-                    const rating = this.getAttribute('data-rating');
-                    highlightStars(rating);
-                });
-            });
-
-            // Reset stars on mouse leave
-            ratingContainer.addEventListener('mouseleave', function() {
-                const currentRating = ratingValue.value;
-                updateStars(currentRating);
-            });
-
-            function updateStars(rating) {
-                stars.forEach((star, index) => {
-                    if (index < rating) {
-                        star.classList.add('active');
-                    } else {
-                        star.classList.remove('active');
-                    }
-                });
-            }
-
-            function highlightStars(rating) {
-                stars.forEach((star, index) => {
-                    if (index < rating) {
-                        star.style.color = 'var(--warning)';
-                    } else {
-                        star.style.color = '#ddd';
-                    }
-                });
-            }
-
-            // Form submission
-            submitButton.addEventListener('click', function() {
-                const rating = ratingValue.value;
-                
-                if (rating === '0') {
-                    ratingContainer.classList.add('error');
-                    ratingError.style.display = 'block';
-                    return;
-                }
-                
-                feedbackForm.submit();
-            });
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = this.getAttribute('data-rating');
+            ratingValue.value = rating;
+            updateStars(rating);
+            ratingContainer.classList.remove('error');
+            ratingError.style.display = 'none';
         });
-    </script>
+
+        star.addEventListener('mouseover', function() {
+            const rating = this.getAttribute('data-rating');
+            highlightStars(rating);
+        });
+    });
+
+    ratingContainer.addEventListener('mouseleave', function() {
+        updateStars(ratingValue.value);
+    });
+
+    function updateStars(rating) {
+        stars.forEach((star, index) => {
+            star.classList.toggle('active', index < rating);
+        });
+    }
+
+    function highlightStars(rating) {
+        stars.forEach((star, index) => {
+            star.style.color = index < rating ? 'var(--warning)' : '#ddd';
+        });
+    }
+
+    // Character counter for feedback textarea
+    const comments = document.getElementById('comments');
+    const charCount = document.getElementById('charCount');
+    comments.addEventListener('input', function() {
+        const len = this.value.length;
+        charCount.textContent = `${len} / 1000`;
+        if (len >= 1000) {
+            this.value = this.value.substring(0, 1000);
+            charCount.classList.add('text-danger');
+        } else {
+            charCount.classList.remove('text-danger');
+        }
+    });
+
+    // Form validation
+    feedbackForm.addEventListener('submit', function(e) {
+        if (ratingValue.value === '0') {
+            e.preventDefault();
+            ratingContainer.classList.add('error');
+            ratingError.style.display = 'block';
+        }
+    });
+});
+</script>
+
 </body>
 
 </html>
