@@ -22,13 +22,12 @@ public interface ProductDao extends JpaRepository<Product, Long> {
     // ✅ Name search (built-in Spring Data method)
     Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
-    // ✅ Custom full-text style search (name + description)
     @Query("""
-           SELECT p FROM Product p
-           WHERE LOWER(p.name) LIKE CONCAT('%', LOWER(:keyword), '%')
-              OR LOWER(p.description) LIKE CONCAT('%', LOWER(:keyword), '%')
-           """)
-    Page<Product> searchByNameOrDescription(@Param("keyword") String keyword, Pageable pageable);
+    	       SELECT p FROM Product p
+    	       WHERE LOWER(p.name) LIKE CONCAT('%', :keyword, '%')
+    	          OR LOWER(p.description) LIKE CONCAT('%', :keyword, '%')
+    	       """)
+    	Page<Product> searchByNameOrDescription(@Param("keyword") String keyword, Pageable pageable);
 
     // ✅ Non-paginated version (useful for admin or analytics)
     @Query("""
