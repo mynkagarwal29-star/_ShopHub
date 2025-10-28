@@ -59,13 +59,10 @@ public class HomeController {
             @RequestParam(required = false) String search,
             Model model) {
 
-        // Step 1: Fetch all products in a Page
-        Page<Product> productPage = pd.findAll(PageRequest.of(page, size));
+        // Step 1: Fetch ALL products (not paginated)
+        List<Product> products = pd.findAll();
 
-        // Step 2: Convert to a List for potential filtering
-        List<Product> products = new ArrayList<>(productPage.getContent());
-
-        // Step 3: If search is provided, filter the list
+        // Step 2: Filter if search term is provided
         if (search != null && !search.trim().isEmpty()) {
             String lowerSearch = search.toLowerCase();
             products = products.stream()
@@ -74,17 +71,22 @@ public class HomeController {
                     .collect(Collectors.toList());
         }
 
-        // Step 4: Wrap the filtered list back into a Page object
-        Page<Product> filteredPage = new PageImpl<>(products, PageRequest.of(page, size), products.size());
+        // Step 3: Handle manual pagination
+        int start = Math.min(page * size, products.size());
+        int end = Math.min(start + size, products.size());
+        List<Product> pageContent = products.subList(start, end);
 
-        // Step 5: Add attributes to model
-        model.addAttribute("productPage", filteredPage);
+        Page<Product> productPage = new PageImpl<>(pageContent, PageRequest.of(page, size), products.size());
+
+        // Step 4: Add to model
+        model.addAttribute("productPage", productPage);
         model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", filteredPage.getTotalPages());
+        model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("search", search);
 
         return "productlist";
     }
+
 
 
     @GetMapping("/user_category")
