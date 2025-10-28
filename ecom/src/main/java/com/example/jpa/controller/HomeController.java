@@ -1,12 +1,13 @@
 package com.example.jpa.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,41 +53,38 @@ public class HomeController {
     }
     
     @GetMapping("/productlist")
-    public String allProductsUser(
+    public String all_products_user(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             @RequestParam(required = false) String search,
             Model model) {
 
-        Page<Product> productPage;
+        // Step 1: Fetch all products in a Page
+        Page<Product> productPage = pd.findAll(PageRequest.of(page, size));
 
+        // Step 2: Convert to a List for potential filtering
+        List<Product> products = new ArrayList<>(productPage.getContent());
+
+        // Step 3: If search is provided, filter the list
         if (search != null && !search.trim().isEmpty()) {
-            String keyword = search.trim().toLowerCase();
-             keyword = search.toLowerCase();
-            pd.searchByNameOrDescriptionRaw("%" + keyword + "%");
-
-            List<Product> results = pd.searchByNameOrDescription(keyword);
-
-            int start = page * size;
-            int end = Math.min(start + size, results.size());
-            List<Product> paged = results.subList(start, end);
-            Pageable pageable = PageRequest.of(page, size);
-            productPage = new PageImpl<>(paged, pageable, results.size());
-        } else {
-            Pageable pageable = PageRequest.of(page, size);
-            productPage = pd.findAll(pageable);
+            String lowerSearch = search.toLowerCase();
+            products = products.stream()
+                    .filter(p -> (p.getName() != null && p.getName().toLowerCase().contains(lowerSearch)) ||
+                                 (p.getDescription() != null && p.getDescription().toLowerCase().contains(lowerSearch)))
+                    .collect(Collectors.toList());
         }
 
-        model.addAttribute("productPage", productPage);
+        // Step 4: Wrap the filtered list back into a Page object
+        Page<Product> filteredPage = new PageImpl<>(products, PageRequest.of(page, size), products.size());
+
+        // Step 5: Add attributes to model
+        model.addAttribute("productPage", filteredPage);
         model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("totalPages", filteredPage.getTotalPages());
         model.addAttribute("search", search);
 
         return "productlist";
     }
-
-
-
 
 
     @GetMapping("/user_category")
