@@ -56,13 +56,13 @@ public class HomeController {
         Model model) {
 
         Page<Product> productPage;
-
         if (search != null && !search.trim().isEmpty()) {
-            // Using the new method that searches both name and description
-            productPage = pd.searchByNameOrDescription(search, PageRequest.of(page, size));
+            String keyword = search.trim().toLowerCase();
+            productPage = pd.searchByNameOrDescription(keyword, PageRequest.of(page, size));
         } else {
             productPage = pd.findAll(PageRequest.of(page, size));
         }
+
 
         model.addAttribute("productPage", productPage);
         model.addAttribute("currentPage", page);
