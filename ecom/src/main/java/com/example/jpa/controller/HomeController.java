@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,19 +52,26 @@ public class HomeController {
     }
     
     @GetMapping("/productlist")
-    public String all_products_user(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "8") int size,
-        @RequestParam(required = false) String search,
-        Model model) {
+    public String allProductsUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(required = false) String search,
+            Model model) {
 
         Page<Product> productPage;
 
         if (search != null && !search.trim().isEmpty()) {
-            // Using the new method that searches both name and description
-            productPage = pd.searchByNameOrDescription(search, PageRequest.of(page, size));
+            String keyword = search.trim().toLowerCase(); // ✅ lowercase here
+            List<Product> results = pd.searchByNameOrDescriptionRaw(keyword);
+
+            int start = page * size;
+            int end = Math.min(start + size, results.size());
+            List<Product> paged = results.subList(start, end);
+            Pageable pageable = PageRequest.of(page, size);
+            productPage = new PageImpl<>(paged, pageable, results.size());
         } else {
-            productPage = pd.findAll(PageRequest.of(page, size));
+            Pageable pageable = PageRequest.of(page, size);
+            productPage = pd.findAll(pageable);
         }
 
         model.addAttribute("productPage", productPage);
@@ -72,6 +81,10 @@ public class HomeController {
 
         return "productlist";
     }
+
+
+
+
 
     @GetMapping("/user_category")
     public String shopbycategory(Model model) {
