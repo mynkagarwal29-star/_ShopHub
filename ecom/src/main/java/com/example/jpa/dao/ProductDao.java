@@ -22,15 +22,13 @@ public interface ProductDao extends JpaRepository<Product, Long> {
     // Search products by name (case-insensitive) with pagination
     Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
-    /* Search products by name or description (case-insensitive) with pagination
-    @Query("SELECT p FROM Product p WHERE " +
-           "LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<Product> findByNameOrDescription(@Param("keyword") String keyword, Pageable pageable);
-
-    default Page<Product> searchByNameOrDescription(String keyword, Pageable pageable) {
-        return findByNameOrDescription(keyword, pageable);
-    }*/
+    // Search products by name or description (case-insensitive) with pagination
+    @Query("""
+    	    SELECT p FROM Product p 
+    	    WHERE lower(p.name) LIKE %:keyword%
+    	       OR lower(p.description) LIKE %:keyword%
+    	""")
+    	List<Product> searchByNameOrDescription(@Param("keyword") String keyword);
 
     // Raw search without pagination (case-insensitive)
     @Query("SELECT p FROM Product p WHERE " +

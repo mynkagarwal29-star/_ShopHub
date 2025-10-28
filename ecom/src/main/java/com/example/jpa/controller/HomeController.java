@@ -61,8 +61,11 @@ public class HomeController {
         Page<Product> productPage;
 
         if (search != null && !search.trim().isEmpty()) {
-            String keyword = search.trim().toLowerCase(); // ✅ lowercase here
-            List<Product> results = pd.searchByNameOrDescriptionRaw(keyword);
+            String keyword = search.trim().toLowerCase();
+             keyword = search.toLowerCase();
+            pd.searchByNameOrDescriptionRaw("%" + keyword + "%");
+
+            List<Product> results = pd.searchByNameOrDescription(keyword);
 
             int start = page * size;
             int end = Math.min(start + size, results.size());
