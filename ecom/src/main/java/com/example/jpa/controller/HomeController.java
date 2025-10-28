@@ -48,6 +48,7 @@ public class HomeController {
             return "error";
         }
     }
+    
     @GetMapping("/productlist")
     public String all_products_user(
         @RequestParam(defaultValue = "0") int page,
@@ -56,13 +57,13 @@ public class HomeController {
         Model model) {
 
         Page<Product> productPage;
+
         if (search != null && !search.trim().isEmpty()) {
-            String keyword = search.trim().toLowerCase();
-            productPage = pd.searchByNameOrDescription(keyword, PageRequest.of(page, size));
+            // Using the new method that searches both name and description
+            productPage = pd.searchByNameOrDescription(search, PageRequest.of(page, size));
         } else {
             productPage = pd.findAll(PageRequest.of(page, size));
         }
-
 
         model.addAttribute("productPage", productPage);
         model.addAttribute("currentPage", page);
@@ -71,7 +72,6 @@ public class HomeController {
 
         return "productlist";
     }
-
 
     @GetMapping("/user_category")
     public String shopbycategory(Model model) {
