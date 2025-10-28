@@ -466,7 +466,7 @@
     <!-- Search form and Back button -->
     <div class="row">
         <div class="col-md-8 offset-md-2">
-            <form class="input-group mb-3" method="get" action="/productlist">
+            <form class="input-group mb-3" method="get" action="${pageContext.request.contextPath}/productlist">
                 <input type="text" name="search" class="form-control" placeholder="Search product..." value="${search != null ? search : ''}">
                 <button class="btn btn-primary" type="submit">Search</button>
                 <a href="/productlist" class="btn btn-secondary">Back</a>

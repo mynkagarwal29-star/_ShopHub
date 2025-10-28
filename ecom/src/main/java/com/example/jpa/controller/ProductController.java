@@ -195,20 +195,36 @@ public class ProductController {
 
 
     @GetMapping("/deletepd/{id}")
-    public String Delete(@PathVariable Long id, RedirectAttributes model) {
+    public String deleteProduct(@PathVariable Long id, RedirectAttributes model) {
         Product product = pd.findById(id).orElse(null);
+
         if (product != null) {
-            // Check cartItems referencing this product
-            long count = cartItemDao.countByProduct(product);
-            if (count > 0) {
-                model.addFlashAttribute("msg", "Cannot delete product: it is present in some carts");
+            // Check if product is in any customer's cart
+            long cartCount = cartItemDao.countByProduct(product);
+
+            // Check if product is in any active (not yet delivered) orders
+            long activeOrderCount = oid.countActiveOrdersByProduct(product);
+
+            if (cartCount > 0) {
+                model.addFlashAttribute("msg", 
+                    "Cannot delete product: it is present in one or more customers' carts.");
                 return "redirect:/viewitem";
             }
+
+            if (activeOrderCount > 0) {
+                model.addFlashAttribute("msg", 
+                    "Cannot delete product: it is part of an active order (not yet delivered or completed).");
+                return "redirect:/viewitem";
+            }
+
+            // ✅ If product is only in delivered/completed orders, it's safe to delete
             pd.deleteById(id);
             model.addFlashAttribute("msg", "Product was deleted successfully!");
         } else {
-            model.addFlashAttribute("msg", "Product not found");
+            model.addFlashAttribute("msg", "Product not found.");
         }
+
         return "redirect:/viewitem";
     }
+
 }
