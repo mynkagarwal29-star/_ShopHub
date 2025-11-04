@@ -602,5 +602,79 @@
     </footer>   
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Password validation regex: 1 upper, 1 lower, 1 number, 1 special, min 8 chars
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    // Attach validation to all password fields
+    const passwordFields = [
+        document.getElementById("currentPasswordEmail"),
+        document.getElementById("newPassword"),
+        document.getElementById("confirmPassword"),
+        document.getElementById("password")
+    ].filter(Boolean);
+
+    passwordFields.forEach(field => {
+        field.addEventListener("input", () => {
+            const msgId = field.id + "-msg";
+            let msgElem = document.getElementById(msgId);
+
+            // Create message element if not present
+            if (!msgElem) {
+                msgElem = document.createElement("small");
+                msgElem.id = msgId;
+                msgElem.classList.add("form-text");
+                field.insertAdjacentElement("afterend", msgElem);
+            }
+
+            // Validate password
+            if (!field.value) {
+                msgElem.textContent = "";
+                return;
+            }
+            if (passwordRegex.test(field.value)) {
+                msgElem.textContent = "✅ Strong password!";
+                msgElem.classList.remove("text-danger");
+                msgElem.classList.add("text-success");
+            } else {
+                msgElem.textContent = "❌ Must be 8+ chars with upper, lower, number & special symbol.";
+                msgElem.classList.remove("text-success");
+                msgElem.classList.add("text-danger");
+            }
+        });
+    });
+
+    // Confirm password matching
+    const newPassword = document.getElementById("newPassword");
+    const confirmPassword = document.getElementById("confirmPassword");
+
+    if (newPassword && confirmPassword) {
+        confirmPassword.addEventListener("input", () => {
+            const msgId = confirmPassword.id + "-match";
+            let msgElem = document.getElementById(msgId);
+            if (!msgElem) {
+                msgElem = document.createElement("small");
+                msgElem.id = msgId;
+                msgElem.classList.add("form-text");
+                confirmPassword.insertAdjacentElement("afterend", msgElem);
+            }
+            if (confirmPassword.value && newPassword.value === confirmPassword.value) {
+                msgElem.textContent = "✅ Passwords match!";
+                msgElem.classList.remove("text-danger");
+                msgElem.classList.add("text-success");
+            } else if (confirmPassword.value) {
+                msgElem.textContent = "❌ Passwords do not match.";
+                msgElem.classList.remove("text-success");
+                msgElem.classList.add("text-danger");
+            } else {
+                msgElem.textContent = "";
+            }
+        });
+    }
+});
+</script>
+
+    
 </body>
 </html>

@@ -111,46 +111,62 @@ public class AccountController {
     
     @PostMapping("/loginprocess")
     public String login(@RequestParam("email") String email,
-            @RequestParam("password") String pwd,
-            ModelMap model, HttpSession session) {
+                        @RequestParam("password") String pwd,
+                        ModelMap model, HttpSession session) {
 
         // Find user by email only
         Account user = ac.findByEmail(email).orElse(null);
-        if (user != null && passwordEncoder.matches(pwd, user.getPassword())) {
-            // Clear old attributes
-            session.removeAttribute("udata");
-            session.removeAttribute("accdata");
-            session.removeAttribute("AccHolder");
-            session.removeAttribute("adminloggedin");
-            session.removeAttribute("loggedInUser");
 
-            // Set the current user in session
-            session.setAttribute("currentUser", user);
-
-            if (user.getRole().equals("user")) {
-                // Merge guest cart if exists
-                Map<Long, Integer> guestCart = (Map<Long, Integer>) session.getAttribute("guestCart");
-                boolean hasItemsInCart = false;
-
-                if (guestCart != null && !guestCart.isEmpty()) {
-                    Cart cart = cartService.getCartByAccount(user);
-                    for (Map.Entry<Long, Integer> entry : guestCart.entrySet()) {
-                        cartService.addToCart(user, entry.getKey(), entry.getValue());
-                    }
-                    session.removeAttribute("guestCart");
-                    hasItemsInCart = true;
-                }
-
-                return hasItemsInCart ? "redirect:/cart" : "redirect:/profiledetails";
-            } else if (user.getRole().equals("admin")) {
-                session.setAttribute("adminloggedin", "Welcome Admin!");
-                session.setAttribute("loggedInUser", "Admin");
-                return "redirect:/viewitem";
-            }
+        if (user == null) {
+            // Email not found
+            model.put("msg", "Email does not exist!");
+            return "login";
         }
-        model.put("msg", "Wrong credentials !");
+
+        // Email exists — check password
+        if (!passwordEncoder.matches(pwd, user.getPassword())) {
+            model.put("msg", "Incorrect password!");
+            return "login";
+        }
+
+        // ✅ Credentials are valid — proceed with login
+        // Clear old attributes
+        session.removeAttribute("udata");
+        session.removeAttribute("accdata");
+        session.removeAttribute("AccHolder");
+        session.removeAttribute("adminloggedin");
+        session.removeAttribute("loggedInUser");
+
+        // Set the current user in session
+        session.setAttribute("currentUser", user);
+
+        // Role-based redirect
+        if (user.getRole().equalsIgnoreCase("user")) {
+            // Merge guest cart if exists
+            Map<Long, Integer> guestCart = (Map<Long, Integer>) session.getAttribute("guestCart");
+            boolean hasItemsInCart = false;
+
+            if (guestCart != null && !guestCart.isEmpty()) {
+                Cart cart = cartService.getCartByAccount(user);
+                for (Map.Entry<Long, Integer> entry : guestCart.entrySet()) {
+                    cartService.addToCart(user, entry.getKey(), entry.getValue());
+                }
+                session.removeAttribute("guestCart");
+                hasItemsInCart = true;
+            }
+
+            return hasItemsInCart ? "redirect:/cart" : "redirect:/profiledetails";
+        } 
+        else if (user.getRole().equalsIgnoreCase("admin")) {
+            session.setAttribute("adminloggedin", "Welcome Admin!");
+            session.setAttribute("loggedInUser", "Admin");
+            return "redirect:/viewitem";
+        }
+
+        // Default fallback
         return "login";
     }
+
     
     @GetMapping("logout")
     public String logout(HttpServletRequest req, HttpServletResponse response) {
@@ -199,6 +215,27 @@ public class AccountController {
         boolean valid = otpservice.verifyOtp(email, otp);
         return valid ? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+    
+    
+    @PostMapping("/sendSignupOtp")
+    public ResponseEntity<String> sendSignupOtp(@RequestParam String email) {
+        try {
+            otpservice.generateAndSendSignupOtp(email);
+            return ResponseEntity.ok("OTP sent successfully to " + email);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Failed to send OTP: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/verifySignupOtp")
+    public ResponseEntity<Void> verifySignupOtp(@RequestParam String email, @RequestParam String otp) {
+        boolean valid = otpservice.verifyOtp(email, otp);
+        return valid ? ResponseEntity.ok().build()
+                     : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
     
     
     @PostMapping("/updatePassword")
@@ -340,4 +377,54 @@ public class AccountController {
             return "redirect:/account";
         }
     }
+    
+    @PostMapping("/sendEmailChangeOtp")
+    public ResponseEntity<String> sendEmailChangeOtp(@RequestParam String newEmail) {
+        try {
+            otpservice.generateAndSendSignupOtp(newEmail); // reuse signup OTP
+            return ResponseEntity.ok("OTP sent to " + newEmail);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send OTP: " + e.getMessage());
+        }
+    }
+
+    
+    @PostMapping("/verifyEmailChangeOtp")
+    public ResponseEntity<String> verifyEmailChangeOtp(
+            @RequestParam String newEmail,
+            @RequestParam String otp,
+            @RequestParam String currentPassword,
+            HttpSession session) {
+
+        Account currentUser = (Account) session.getAttribute("currentUser");
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not logged in.");
+        }
+
+        boolean validOtp = otpservice.verifyOtp(newEmail, otp);
+        if (!validOtp) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired OTP.");
+        }
+
+        // Check password before updating
+        Optional<Account> optional = accDao.findById(currentUser.getId());
+        if (optional.isPresent()) {
+            Account account = optional.get();
+            if (!account.getPassword().equals(currentPassword)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Incorrect password.");
+            }
+
+            account.setEmail(newEmail);
+            accDao.save(account);
+            otpservice.clearOtp(newEmail);
+            session.setAttribute("currentUser", account);
+
+            return ResponseEntity.ok("Email updated successfully.");
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+    }
+
 }

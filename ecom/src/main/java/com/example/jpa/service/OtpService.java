@@ -91,4 +91,19 @@ public class OtpService {
     public void clearOtp(String email) {
         otpStorage.remove(email); // remove the OTP after successful password reset
     }
+    
+    
+    public void generateAndSendSignupOtp(String email) {
+        // ✅ Skip the DB check — allow new email
+        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
+
+        otpStorage.put(email, new OtpData(otp, LocalDateTime.now().plusMinutes(EXPIRY_MINUTES)));
+
+        String subject = "Your ShopHub Signup Verification OTP";
+        String message = "Dear user,\n\nYour OTP for signup verification is: " + otp +
+                "\n\nThis OTP will expire in " + EXPIRY_MINUTES + " minutes.\n\nWelcome to ShopHub!";
+
+        emailService.sendSimpleMail(email, subject, message);
+    }
+
 }

@@ -631,7 +631,92 @@
         .always(function(){ $('#updatePasswordBtn').prop('disabled', false); });
     });
 });
-</script> 
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Regex for strong passwords
+    const strongPassPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    // Attach validation to all password inputs
+    const passwordFields = [
+        { id: "currentPasswordEmail", type: "current" },
+        { id: "newPassword", type: "new" },
+        { id: "confirmPassword", type: "confirm" }
+    ];
+
+    passwordFields.forEach(fieldObj => {
+        const field = document.getElementById(fieldObj.id);
+        if (!field) return;
+
+        field.addEventListener("input", () => {
+            let msgId = `${field.id}-msg`;
+            let msgElem = document.getElementById(msgId);
+            if (!msgElem) {
+                msgElem = document.createElement("small");
+                msgElem.id = msgId;
+                msgElem.classList.add("form-text");
+                field.insertAdjacentElement("afterend", msgElem);
+            }
+
+            const val = field.value.trim();
+            if (!val) {
+                msgElem.textContent = "";
+                return;
+            }
+
+            if (fieldObj.type !== "confirm") {
+                if (strongPassPattern.test(val)) {
+                    msgElem.textContent = "✅ Strong password!";
+                    msgElem.classList.remove("text-danger");
+                    msgElem.classList.add("text-success");
+                } else {
+                    msgElem.textContent = "❌ Must include uppercase, lowercase, number, special char, and be 8+ characters.";
+                    msgElem.classList.remove("text-success");
+                    msgElem.classList.add("text-danger");
+                }
+            }
+
+            // Confirm password live match check
+            if (fieldObj.type === "confirm") {
+                const newPass = document.getElementById("newPassword").value.trim();
+                if (val === newPass && val !== "") {
+                    msgElem.textContent = "✅ Passwords match!";
+                    msgElem.classList.remove("text-danger");
+                    msgElem.classList.add("text-success");
+                } else {
+                    msgElem.textContent = "❌ Passwords do not match.";
+                    msgElem.classList.remove("text-success");
+                    msgElem.classList.add("text-danger");
+                }
+            }
+        });
+    });
+
+    // Final form submission check (for update password step)
+    const updateBtn = document.getElementById("updatePasswordBtn");
+    if (updateBtn) {
+        updateBtn.addEventListener("click", function (e) {
+            const newPass = document.getElementById("newPassword").value.trim();
+            const confirmPass = document.getElementById("confirmPassword").value.trim();
+            const resetMsg = document.getElementById("resetMsg");
+
+            if (!strongPassPattern.test(newPass)) {
+                e.preventDefault();
+                resetMsg.textContent = "❌ Password must be strong (uppercase, lowercase, number, special, 8+ chars).";
+                resetMsg.classList.add("text-danger");
+                return false;
+            }
+            if (newPass !== confirmPass) {
+                e.preventDefault();
+                resetMsg.textContent = "❌ Passwords do not match.";
+                resetMsg.classList.add("text-danger");
+                return false;
+            }
+        });
+    }
+});
+</script>
+ 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
 
 </body>

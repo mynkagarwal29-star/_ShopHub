@@ -119,9 +119,11 @@ a.text-link:hover { color:#0a58ca; text-decoration:underline; }
             <input type="email" class="form-control" name="email" placeholder="Enter your email" value="<%= (email != null) ? email : "" %>" required>
   		</div>
         <div class="mb-3">
-            <label class="fw-semibold">Password</label>
-            <input type="password" class="form-control" name="password" placeholder="Enter your password" required>
-        </div>
+    <label class="fw-semibold">Password</label>
+    <input type="password" class="form-control" name="password" placeholder="Enter your password" required>
+    <small id="passwordError" class="text-danger" style="display:none;"></small>
+</div>
+
         <div class="d-grid">
             <button type="submit" class="btn btn-primary btn-lg">
                 <i class="bi bi-box-arrow-in-right me-1"></i> Login
@@ -204,6 +206,33 @@ a.text-link:hover { color:#0a58ca; text-decoration:underline; }
 $(document).ready(function(){
     let emailGlobal = '';
 
+    // --- Strong password regex ---
+    const strongPassPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    
+    
+ // -------- INLINE PASSWORD VALIDATION --------
+    $('form[action="/loginprocess"]').on('submit', function(e){
+        const pwd = $(this).find('input[name="password"]').val().trim();
+        const errorEl = $('#passwordError');
+        errorEl.hide().text(''); // Reset previous error
+
+        if (!strongPassPattern.test(pwd)) {
+            e.preventDefault();
+            errorEl.text('Password must include uppercase, lowercase, number, and special character, and be at least 8 characters long.');
+            errorEl.show();
+            return false;
+        }
+
+        return true;
+    });
+
+    // Optional: clear the message when typing
+    $('input[name="password"]').on('input', function() {
+        $('#passwordError').fadeOut();
+    });
+
+
+    // -------- FORGOT PASSWORD MODAL LOGIC --------
     function showSpinner(msg){
         $('#resetSpinner').show();
         $('#resetStatusText').text(msg);
@@ -225,7 +254,11 @@ $(document).ready(function(){
     // Step 1: Send OTP
     $('#sendOtpBtn').click(function(){
         let email = $('#resetEmail').val().trim();
-        if(!email){ $('#resetMsg').text('Please enter email').addClass('text-danger').removeClass('text-success'); return; }
+        if(!email){
+            $('#resetMsg').text('Please enter email')
+                .addClass('text-danger').removeClass('text-success'); 
+            return;
+        }
         emailGlobal = email;
 
         $(this).prop('disabled', true);
@@ -234,13 +267,15 @@ $(document).ready(function(){
         $.post('/sendResetOtp', {email: email})
         .done(function(){
             hideSpinner();
-            $('#resetMsg').text('OTP sent to your email').removeClass('text-danger').addClass('text-success');
+            $('#resetMsg').text('OTP sent to your email')
+                .removeClass('text-danger').addClass('text-success');
             $('#stepEmail').hide(); 
             $('#stepOtp').show();
         })
         .fail(function(err){
             hideSpinner();
-            $('#resetMsg').text(err.responseText || 'Error sending OTP').removeClass('text-success').addClass('text-danger');
+            $('#resetMsg').text(err.responseText || 'Error sending OTP')
+                .removeClass('text-success').addClass('text-danger');
         })
         .always(function(){ $('#sendOtpBtn').prop('disabled', false); });
     });
@@ -248,7 +283,11 @@ $(document).ready(function(){
     // Step 2: Verify OTP
     $('#verifyOtpBtn').click(function(){
         let otp = $('#otpInput').val().trim();
-        if(!otp){ $('#resetMsg').text('Enter OTP').removeClass('text-success').addClass('text-danger'); return; }
+        if(!otp){ 
+            $('#resetMsg').text('Enter OTP')
+                .removeClass('text-success').addClass('text-danger'); 
+            return; 
+        }
 
         $(this).prop('disabled', true);
         showSpinner('Verifying OTP...');
@@ -256,41 +295,60 @@ $(document).ready(function(){
         $.post('/verifyResetOtp', {email: emailGlobal, otp: otp})
         .done(function(){
             hideSpinner();
-            $('#resetMsg').text('OTP Verified!').removeClass('text-danger').addClass('text-success');
+            $('#resetMsg').text('OTP Verified!')
+                .removeClass('text-danger').addClass('text-success');
             $('#stepOtp').hide(); 
             $('#stepNewPassword').show();
         })
         .fail(function(){
             hideSpinner();
-            $('#resetMsg').text('Invalid OTP, please try again').removeClass('text-success').addClass('text-danger');
+            $('#resetMsg').text('Invalid OTP, please try again')
+                .removeClass('text-success').addClass('text-danger');
         })
         .always(function(){ $('#verifyOtpBtn').prop('disabled', false); });
     });
 
-    // Step 3: Update Password
+    // Step 3: Update Password (Strong Password Check)
     $('#updatePasswordBtn').click(function(){
         let pwd = $('#newPassword').val().trim();
         let confirmPwd = $('#confirmPassword').val().trim();
-        if(!pwd || !confirmPwd){ $('#resetMsg').text('Enter all fields').addClass('text-danger').removeClass('text-success'); return; }
-        if(pwd !== confirmPwd){ $('#resetMsg').text('Passwords do not match').addClass('text-danger').removeClass('text-success'); return; }
 
-        $(this).prop('disabled', true);
+        if(!pwd || !confirmPwd){
+            $('#resetMsg').text('Enter all fields')
+                .addClass('text-danger').removeClass('text-success');
+            return;
+        }
+        if(!strongPassPattern.test(pwd)){
+            $('#resetMsg').html('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.')
+                .addClass('text-danger').removeClass('text-success');
+            return;
+        }
+        if(pwd !== confirmPwd){
+            $('#resetMsg').text('Passwords do not match')
+                .addClass('text-danger').removeClass('text-success');
+            return;
+        }
+
+        $(this).prop('disabled', true);z
         showSpinner('Updating password...');
 
         $.post('/updatePassword', {email: emailGlobal, newPassword: pwd})
         .done(function(){
             hideSpinner();
-            $('#resetMsg').text('Password updated successfully!').removeClass('text-danger').addClass('text-success');
+            $('#resetMsg').text('Password updated successfully!')
+                .removeClass('text-danger').addClass('text-success');
             setTimeout(()=> { $('#resetModal').modal('hide'); }, 1500);
         })
         .fail(function(){
             hideSpinner();
-            $('#resetMsg').text('Error updating password').removeClass('text-success').addClass('text-danger');
+            $('#resetMsg').text('Error updating password')
+                .removeClass('text-success').addClass('text-danger');
         })
         .always(function(){ $('#updatePasswordBtn').prop('disabled', false); });
     });
 });
 </script>
+
 
 </body>
 </html>

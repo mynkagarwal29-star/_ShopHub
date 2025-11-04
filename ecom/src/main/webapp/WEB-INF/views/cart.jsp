@@ -493,76 +493,147 @@ String error = (String) request.getAttribute("error");
 
         <% if (currentUser != null) { %>
             <!-- Logged-in user: checkout form -->
-            <form action="/orders/place" method="post" class="mt-3">
-            <%
+<form action="/orders/place" method="post" class="mt-3" onsubmit="return validateOrderForm();">
+<%
     String line1 = (String) request.getAttribute("line1");
     String city = (String) request.getAttribute("city");
     String postal = (String) request.getAttribute("postal");
     String country = (String) request.getAttribute("country");
     String phoneNumber = (String) request.getAttribute("phoneNumber");
 
-                if (line1 != null && !line1.isEmpty()) {
-            %>
-                <div class="mb-2">
-                    <label class="form-label">Address Line</label>
-                    <input type="text" name="line1" class="form-control" value="<%= line1 %>" />
-                </div>
-            
-                <div class="mb-2">
-                    <label class="form-label">City</label>
-                    <input type="text" name="city" class="form-control" value="<%= city %>" />
-                </div>
-            
-                <div class="mb-2">
-                    <label class="form-label">Postal Code</label>
-                    <input type="text" name="postal" class="form-control" value="<%= postal %>" />
-                </div>
-            
-                <div class="mb-2">
-                    <label class="form-label">Country</label>
-                    <input type="text" name="country" class="form-control" value="<%= country %>" />
-                </div>
-            
-                <div class="mb-2">
-                    <label class="form-label">Phone Number</label>
-                    <input type="text" name="phoneNumber" class="form-control" value="<%= phoneNumber %>" />
-                </div>
-            <%
-                }else{
-            %>
-            
-                <div class="mb-2">
-    <label class="form-label">Address Line</label>
-    <input type="text" name="line1" class="form-control" value="${line1}" required>
-</div>
-<div class="mb-2">
-    <label class="form-label">City</label>
-    <input type="text" name="city" class="form-control" value="${city}" required>
-</div>
-<div class="mb-2">
-    <label class="form-label">Postal Code</label>
-    <input type="text" name="postal" class="form-control" value="${postal}" required>
-</div> 
-<div class="mb-2">
-    <label class="form-label">Country</label>
-    <input type="text" name="country" class="form-control" value="${country}" required>
-</div>
-<div class="mb-3">
-    <label class="form-label">Phone Number</label>
-    <input type="text" name="phoneNumber" class="form-control" value="${phoneNumber}" required>
-</div>
+    if (line1 != null && !line1.isEmpty()) {
+%>
+    <div class="mb-2">
+        <label class="form-label">Address Line</label>
+        <input type="text" name="line1" id="line1" class="form-control" value="<%= line1 %>" />
+        <div id="line1Error" class="text-danger small"></div>
+    </div>
 
-<%} %>
-                <!-- Hidden totals -->
-                <input type="hidden" name="subtotal" value="<%= subtotal %>">
-                <input type="hidden" name="tax" value="<%= tax %>">
-                <input type="hidden" name="shipping" value="<%= shipping %>">
-                <input type="hidden" name="total" value="<%= total %>">
+    <div class="mb-2">
+        <label class="form-label">City</label>
+        <input type="text" name="city" id="city" class="form-control" value="<%= city %>" />
+        <div id="cityError" class="text-danger small"></div>
+    </div>
 
-                <button type="submit" class="btn btn-primary w-100">Place Order</button>
-                <small class="text-muted d-block text-center">Always Check your cart before placing the order!</small>
-        
-            </form>
+    <div class="mb-2">
+        <label class="form-label">Postal Code</label>
+        <input type="text" name="postal" id="postal" class="form-control" value="<%= postal %>" />
+        <div id="postalError" class="text-danger small"></div>
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label">Country</label>
+        <input type="text" name="country" id="country" class="form-control" value="<%= country %>" />
+        <div id="countryError" class="text-danger small"></div>
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label">Phone Number</label>
+        <input type="text" name="phoneNumber" id="phoneNumber" class="form-control" value="<%= phoneNumber %>" />
+        <div id="phoneError" class="text-danger small"></div>
+    </div>
+<%
+    } else {
+%>
+    <div class="mb-2">
+        <label class="form-label">Address Line</label>
+        <input type="text" name="line1" id="line1" class="form-control" value="${line1}" required>
+        <div id="line1Error" class="text-danger small"></div>
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label">City</label>
+        <input type="text" name="city" id="city" class="form-control" value="${city}" required>
+        <div id="cityError" class="text-danger small"></div>
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label">Postal Code</label>
+        <input type="text" name="postal" id="postal" class="form-control" value="${postal}" required>
+        <div id="postalError" class="text-danger small"></div>
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label">Country</label>
+        <input type="text" name="country" id="country" class="form-control" value="${country}" required>
+        <div id="countryError" class="text-danger small"></div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Phone Number</label>
+        <input type="text" name="phoneNumber" id="phoneNumber" class="form-control" value="${phoneNumber}" required>
+        <div id="phoneError" class="text-danger small"></div>
+    </div>
+<% } %>
+
+    <!-- Hidden totals -->
+    <input type="hidden" name="subtotal" value="<%= subtotal %>">
+    <input type="hidden" name="tax" value="<%= tax %>">
+    <input type="hidden" name="shipping" value="<%= shipping %>">
+    <input type="hidden" name="total" value="<%= total %>">
+
+    <button type="submit" class="btn btn-primary w-100">Place Order</button>
+    <small class="text-muted d-block text-center">Always Check your cart before placing the order!</small>
+</form>
+
+<script>
+  function validateOrderForm() {
+    let valid = true;
+
+    // Clear previous errors
+    document.querySelectorAll('.text-danger').forEach(el => el.textContent = '');
+
+    // Get values
+    const line1 = document.getElementById('line1').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const postal = document.getElementById('postal').value.trim();
+    const country = document.getElementById('country').value.trim();
+    const phone = document.getElementById('phoneNumber').value.trim();
+
+    // Address validation
+    if (line1.length < 5) {
+      document.getElementById('line1Error').textContent = 'Address line must be at least 5 characters.';
+      valid = false;
+    }
+
+    // City validation (no numbers or symbols)
+    if (city.length < 2 || !/^[A-Za-z\s]+$/.test(city)) {
+      document.getElementById('cityError').textContent = 'Enter a valid city name (letters only).';
+      valid = false;
+    }
+
+    // Postal code validation (5–6 digits only)
+    if (!/^\d{5,6}$/.test(postal)) {
+      document.getElementById('postalError').textContent = 'Postal code must be 5–6 digits.';
+      valid = false;
+    }
+
+    // Country validation (no numbers or symbols)
+    if (country.length < 3 || !/^[A-Za-z\s]+$/.test(country)) {
+      document.getElementById('countryError').textContent = 'Enter a valid country name (letters only).';
+      valid = false;
+    }
+
+    // Phone number validation (exactly 10 digits)
+    if (!/^\d{10}$/.test(phone)) {
+      document.getElementById('phoneError').textContent = 'Phone number must be exactly 10 digits.';
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  // Restrict live input for postal & phone
+  document.getElementById('phoneNumber').addEventListener('input', function (e) {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+  });
+
+  document.getElementById('postal').addEventListener('input', function (e) {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+  });
+</script>
+
+
         <% } else { %>
             <!-- Guest user: redirect to login first -->
             <a href="${pageContext.request.contextPath}/log" class="btn btn-primary w-100 mb-2">
