@@ -329,7 +329,7 @@ $(document).ready(function(){
             return;
         }
 
-        $(this).prop('disabled', true);z
+        $(this).prop('disabled', true);
         showSpinner('Updating password...');
 
         $.post('/updatePassword', {email: emailGlobal, newPassword: pwd})
