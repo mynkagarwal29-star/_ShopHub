@@ -87,12 +87,7 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
-        <dependency>
-		    <groupId>com.sendgrid</groupId>
-		    <artifactId>sendgrid-java</artifactId>
-		    <version>4.9.3</version>
-		</dependency>
+
 		<!--Roll back to old Hibernate-->
 		<dependency>
 		    <groupId>org.hibernate.orm</groupId>

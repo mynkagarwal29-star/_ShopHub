@@ -1,40 +1,37 @@
 package com.example.jpa.service;
 
-import java.io.IOException;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
-import com.sendgrid.Method;
-import com.sendgrid.Request;
-import com.sendgrid.Response;
-import com.sendgrid.SendGrid;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
 
 @Service
 public class EmailService {
 
-    // Keep method signature same
-    public void sendSimpleMail(String to, String subject, String text) {
-        Email from = new Email("mynk.agarwal29@gmail.com"); // must match your SendGrid verified sender
-        Email toEmail = new Email(to);
-        Content content = new Content("text/plain", text);
-        Mail mail = new Mail(from, subject, toEmail, content);
+    @Autowired
+    private JavaMailSender mailSender;
 
-        SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
-        Request request = new Request();
+    // dynamically picks from application.properties / env
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
+    // SAME method signature
+    public void sendSimpleMail(String to, String subject, String text) {
 
         try {
-            request.setMethod(Method.POST);
-            request.setEndpoint("mail/send");
-            request.setBody(mail.build());
-            Response response = sg.api(request);
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail); // no hardcoding now ✅
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(text);
 
-            System.out.println("SendGrid Response Code: " + response.getStatusCode());
-        } catch (IOException ex) {
-            // Optional: log or rethrow
-            throw new RuntimeException("Error sending email via SendGrid", ex);
+            mailSender.send(message);
+
+            System.out.println("Email sent successfully via SMTP");
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Error sending email via SMTP", ex);
         }
     }
 }
