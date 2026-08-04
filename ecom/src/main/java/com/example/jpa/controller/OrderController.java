@@ -70,25 +70,13 @@ public class OrderController {
             return "redirect:/cart";
         }
 
+        // 1. Create order in DB with initial status
         Order order = orderService.placeOrder(user, cartItems, line1, city, postal, country, phoneNumber);
+        order.setStatus("PENDING_PAYMENT");
+        orderDao.save(order);
 
-        // Round total amount to 2 decimal places
-        double totalAmount = order.getTotal();
-        totalAmount = Math.round(totalAmount * 100.0) / 100.0;  // ensures 2 decimal digits
-
-        // Convert to paise for Razorpay (integer)
-        long amountInPaise = Math.round(totalAmount * 100);
-
-        // Dummy Razorpay order ID for now
-        String razorpayOrderId = "order_dummy_" + System.currentTimeMillis();
-
-        model.addAttribute("order", order);
-        model.addAttribute("razorpayOrderId", razorpayOrderId);
-        model.addAttribute("razorpayKeyId", razorpayKeyId);
-        model.addAttribute("amount", amountInPaise);
-        model.addAttribute("currency", "INR");
-
-        return "orderdetail"; // your JSP or Thymeleaf page to show order details
+        // 2. Redirect straight to Payment Controller with the DB Order ID
+        return "redirect:/api/payment/createRazorpayorder?orderId=" + order.getId();
     }
 
     

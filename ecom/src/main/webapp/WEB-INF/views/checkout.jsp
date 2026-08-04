@@ -1,7 +1,19 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String key = (String) request.getAttribute("key");
-    Double amount = (Double) request.getAttribute("amount");
+    
+    // Handle Double, Long, or Integer safely
+    Object amtObj = request.getAttribute("amount");
+    long amountInPaise = 0L;
+    if (amtObj instanceof Double) {
+        amountInPaise = Math.round((Double) amtObj);
+    } else if (amtObj instanceof Long) {
+        amountInPaise = (Long) amtObj;
+    } else if (amtObj instanceof Integer) {
+        amountInPaise = ((Integer) amtObj).longValue();
+    }
+
+    String razorpayOrderId = (String) request.getAttribute("razorpayOrderId");
     String custName = (String) request.getAttribute("custName");
     String custEmail = (String) request.getAttribute("custEmail");
     String custContact = (String) request.getAttribute("custContact");
@@ -22,7 +34,7 @@
     <!-- Lottie Animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.10.1/lottie.min.js"></script>
 
-    <!-- Razorpay -->
+    <!-- Razorpay SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <style>
@@ -66,14 +78,6 @@
             display: none !important;
         }
 
-        .success, .failure {
-            transition: all 0.4s ease;
-        }
-
-        .success h3, .failure h3 {
-            font-weight: 600;
-        }
-
         .success i {
             color: #28a745;
             font-size: 3rem;
@@ -100,7 +104,7 @@
         <!-- Processing Section -->
         <div id="processing">
             <div class="loader" id="lottie-container"></div>
-            <h4 class="status-text mb-3">Processing your payment...</h4>
+            <h4 class="status-text mb-3" id="process-text">Initializing payment gateway...</h4>
             <p class="text-muted">Please do not refresh or close this page.</p>
         </div>
 
@@ -115,7 +119,7 @@
         <div id="failure" class="failure hidden">
             <i class="fas fa-times-circle mb-3"></i>
             <h3>Payment Failed</h3>
-            <p class="text-muted">Something went wrong. Please try again.</p>
+            <p class="text-muted" id="fail-reason">Something went wrong. Please try again.</p>
             <a href="/cart" class="btn btn-outline-danger mt-3">Back to Cart</a>
         </div>
     </div>
@@ -127,82 +131,104 @@
             renderer: 'svg',
             loop: true,
             autoplay: true,
-            path: 'https://assets7.lottiefiles.com/packages/lf20_j1adxtyb.json' // nice spinner animation
+            path: 'https://assets7.lottiefiles.com/packages/lf20_j1adxtyb.json'
         });
 
-        // Razorpay Checkout
-  const options = {
-    "key": "<%= key %>",
-    "amount": <%= (int)(amount * 100) %>,
-    "currency": "INR",
-    "name": "ShopHub",
-    "description": "Order Payment",
-    "handler": function (response) {
-        showSuccess();
-        fetch('/api/payment/success', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'orderId=' + <%= orderId %> + '&paymentId=' + response.razorpay_payment_id
-        }).then(res => {
-            if(res.ok){
-                setTimeout(() => {
-                    window.location.href = "/order/orderconfirm?orderId=" + <%= orderId %>;
-                }, 2000);
-            } else {
-                showFailure();
-            }
-        }).catch(err => {
-            console.error(err);
-            showFailure();
-        });
-    },
-    "prefill": {
-        "name": "<%= custName %>",
-        "email": "<%= custEmail %>",
-        "contact": "<%= custContact %>"
-    },
-    "theme": { "color": "#007bff" },
+        const options = {
+            "key": "<%= key != null ? key : "" %>",
+            "amount": <%= amountInPaise %>,
+            "currency": "INR",
+            "name": "ShopHub",
+            "description": "Order Payment #<%= orderId %>",
+            "order_id": "<%= razorpayOrderId != null ? razorpayOrderId : "" %>",
+            "handler": function (response) {
+                // Update text while verifying signature on server
+                document.getElementById('process-text').innerText = "Verifying payment signature...";
 
-    // 👇 Handles when user closes or cancels payment
-    "modal": {
-        "ondismiss": function() {
-            console.log("Payment cancelled by user.");
-            showFailure();
+                // Send JSON body matching PaymentController @RequestBody Map<String, String>
+                fetch('/api/payment/verify', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({
+                        'dbOrderId': '<%= orderId %>',
+                        'razorpay_order_id': response.razorpay_order_id,
+                        'razorpay_payment_id': response.razorpay_payment_id,
+                        'razorpay_signature': response.razorpay_signature
+                    })
+                })
+                .then(res => {
+                    if (res.ok) {
+                        showSuccess();
+                        setTimeout(() => {
+                            window.location.href = "/order/orderconfirm?orderId=" + <%= orderId %>;
+                        }, 1500);
+                    } else {
+                        return res.text().then(text => { throw new Error(text || "Verification failed"); });
+                    }
+                })
+                .catch(err => {
+                    console.error("Verification error:", err);
+                    showFailure(err.message || "Network error verifying payment.");
+                });
+            },
+            "prefill": {
+                "name": "<%= custName != null ? custName : "" %>",
+                "email": "<%= custEmail != null ? custEmail : "" %>",
+                "contact": "<%= custContact != null ? custContact : "" %>"
+            },
+            "theme": { "color": "#007bff" },
+            "modal": {
+                "ondismiss": function() {
+                    console.log("Payment cancelled by user.");
+                    showFailure("Payment was cancelled.");
 
-            // Notify backend to delete the order
-            fetch('/api/payment/failure', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'orderId=' + <%= orderId %>
-            }).then(res => {
-                if (res.ok) {
-                    setTimeout(() => {
+                    const params = new URLSearchParams();
+                    params.append('orderId', '<%= orderId %>');
+
+                    fetch('/api/payment/failure', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params.toString()
+                    })
+                    .then(() => {
+                        setTimeout(() => {
+                            window.location.href = "/cart";
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error("Error logging failure:", err);
                         window.location.href = "/cart";
-                    }, 2000);
-                } else {
-                    console.error("Failed to delete order after payment cancel");
-                    window.location.href = "/cart";
+                    });
                 }
-            }).catch(err => {
-                console.error(err);
-                window.location.href = "/cart";
-            });
-        }
-    }
-};
+            }
+        };
 
-                
         const rzp1 = new Razorpay(options);
-        rzp1.open();
 
-        // UI helper functions
+        // Catch client-side execution/card rejection errors
+        rzp1.on('payment.failed', function (response){
+            console.error("Razorpay Error:", response.error);
+            showFailure(response.error.description || "Payment failed.");
+        });
+
+        // Open Razorpay modal on page load
+        window.onload = function() {
+            rzp1.open();
+        };
+
+        // UI Helper Functions
         function showSuccess() {
             document.getElementById('processing').classList.add('hidden');
             document.getElementById('failure').classList.add('hidden');
             document.getElementById('success').classList.remove('hidden');
         }
 
-        function showFailure() {
+        function showFailure(reason) {
+            if (reason) {
+                document.getElementById('fail-reason').innerText = reason;
+            }
             document.getElementById('processing').classList.add('hidden');
             document.getElementById('success').classList.add('hidden');
             document.getElementById('failure').classList.remove('hidden');

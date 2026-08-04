@@ -555,7 +555,7 @@
                             for (OrderItem item : items) {
                         %>
                             <div class="order-item d-flex mb-3">
-                                <img src="/uploads/<%= item.getProduct().getImagePath() %>" class="order-item-img me-3" alt="Product">
+                                <img src="<%= item.getProduct().getImagePath() %>" class="order-item-img me-3" alt="Product">
                                 <div class="flex-grow-1">
                                     <div class="order-item-title"><%= item.getProduct().getName() %></div>
                                     <div class="text-muted"><%= item.getProduct().getCategory() %></div>

@@ -150,7 +150,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="/uploads/<%= item.getProduct().getImagePath() %>" 
+                                                <img src="<%= item.getProduct().getImagePath() %>" 
                                                      alt="<%= item.getProduct().getName() %>" 
                                                      class="img-thumbnail me-2" 
                                                      style="width: 50px; height: 50px; object-fit: cover;">

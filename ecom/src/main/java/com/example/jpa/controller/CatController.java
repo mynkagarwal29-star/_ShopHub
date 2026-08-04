@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.jpa.dao.CatDao;
 import com.example.jpa.dao.ProductDao;
 import com.example.jpa.model.Category;
@@ -32,7 +35,8 @@ public class CatController {
     CatDao cd;
     @Autowired
     ProductDao pd;
-
+    @Autowired
+    private Cloudinary cloudinary;
     private static final String Upload_DIR="uploads/";
     
     @PostMapping("/addCategory")
@@ -42,11 +46,6 @@ public class CatController {
             RedirectAttributes redirectAttrs) {
 
         try {
-            // Ensure upload directory exists
-            File dir = new File(Upload_DIR);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
 
             // Validate category name
             if (cd.existsByCategory(cat.getCategory())) {
@@ -54,21 +53,24 @@ public class CatController {
                 return "redirect:/Category";
             }
 
-            // Handle file upload
+            // Validate image
             if (file.isEmpty()) {
                 redirectAttrs.addFlashAttribute("error", "Please upload an image!");
                 return "redirect:/Category";
             }
 
-            String fileName = file.getOriginalFilename();
-            if (fileName == null || fileName.isEmpty()) {
-                redirectAttrs.addFlashAttribute("error", "Invalid file name.");
-                return "redirect:/Category";
-            }
+			// Upload image to Cloudinary
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "ShopHub/categories"
+                        )
+            );
 
-            Path path = Paths.get(Upload_DIR, fileName);
-            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-            cat.setImage(fileName);
+            String imageUrl = (String) uploadResult.get("secure_url");
+
+            // Save Cloudinary URL
+            cat.setImage(imageUrl);
 
             // Save category
             cd.save(cat);
@@ -76,13 +78,9 @@ public class CatController {
             redirectAttrs.addFlashAttribute("success", "Category added successfully!");
             return "redirect:/Category";
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            redirectAttrs.addFlashAttribute("error", "File upload failed: " + e.getMessage());
-            return "redirect:/Category";
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttrs.addFlashAttribute("error", "Unexpected error: " + e.getMessage());
+            redirectAttrs.addFlashAttribute("error", "Error: " + e.getMessage());
             return "redirect:/Category";
         }
     }
@@ -150,45 +148,67 @@ public class CatController {
             RedirectAttributes redirectAttrs) {
 
         try {
-            // Fetch the existing category from DB
+
+            // Fetch existing category
             Category existing = cd.findById(cat.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Category not found for ID: " + cat.getId()));
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(
+                                    "Category not found for ID: " + cat.getId()));
 
             String oldName = existing.getCategory();
 
-            // Handle file upload
+            // Upload new image if selected
             if (!file.isEmpty()) {
-                String fileName = file.getOriginalFilename();
-                if (fileName != null && !fileName.isEmpty()) {
-                    Path path = Paths.get(Upload_DIR, fileName);
-                    Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                    cat.setImage(fileName);
-                }
+
+                Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                        file.getBytes(),
+                        ObjectUtils.asMap(
+                                "folder", "ShopHub/categories"
+                            )
+                );
+
+                String imageUrl = (String) uploadResult.get("secure_url");
+
+                cat.setImage(imageUrl);
+
             } else {
-                // Keep old image if no new one is uploaded
+
+                // Keep existing image
                 cat.setImage(existing.getImage());
+
             }
 
             // Save updated category
             cd.save(cat);
 
-            // Update products using the old category name
+            // Update products using old category name
             List<Product> products = pd.findByCategory(oldName);
+
             for (Product p : products) {
                 p.setCategory(cat.getCategory());
             }
+
             pd.saveAll(products);
 
-            redirectAttrs.addFlashAttribute("success", "Category updated successfully!");
+            redirectAttrs.addFlashAttribute(
+                    "success",
+                    "Category updated successfully!"
+            );
+
             return "redirect:/Category";
 
         } catch (Exception e) {
+
             e.printStackTrace();
-            redirectAttrs.addFlashAttribute("error", "Error updating category: " + e.getMessage());
+
+            redirectAttrs.addFlashAttribute(
+                    "error",
+                    "Error updating category: " + e.getMessage()
+            );
+
             return "redirect:/Category";
         }
     }
-
     @GetMapping("/addForm")
     public String getAllCategoryinProductForm(Model model) {
         List<Category> cat = cd.findAll();

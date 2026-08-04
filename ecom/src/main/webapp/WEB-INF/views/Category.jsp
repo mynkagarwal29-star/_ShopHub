@@ -151,7 +151,7 @@ if (currentUser == null || !"admin".equals(currentUser.getRole())) {
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body d-flex flex-column align-items-center text-center">
                         <a href="/viewitem?category=<%= java.net.URLEncoder.encode(cat.getCategory(), "UTF-8") %>">
-                            <img src="/uploads/<%= cat.getImage() %>" 
+                            <img src="<%= cat.getImage() %>" 
                                  class="img-fluid mb-3 rounded" 
                                  alt="Category Image" 
                                  style="width: 100px; height: 100px; object-fit: cover;">

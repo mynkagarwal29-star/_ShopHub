@@ -12,6 +12,43 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    // Default to empty string if 'spring.mail.from' or 'mailjet.from.email' is missing
+    @Value("${spring.mail.from:${spring.mail.from}}")
+    private String fromEmail;
+
+    public void sendSimpleMail(String to, String subject, String text) {
+        if (fromEmail == null || fromEmail.isBlank()) {
+            throw new IllegalStateException("Email sending failed: No 'from' email defined in application.properties");
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(text);
+
+            mailSender.send(message);
+            System.out.println("Email sent successfully ");
+        } catch (Exception ex) {
+            throw new RuntimeException("Error sending email ", ex);
+        }
+    }
+}
+/*package com.example.jpa.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+@Service
+public class EmailService {
+
+    @Autowired
+    private JavaMailSender mailSender;
+
     // dynamically picks from application.properties / env
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -34,4 +71,4 @@ public class EmailService {
             throw new RuntimeException("Error sending email via SMTP", ex);
         }
     }
-}
+}*/

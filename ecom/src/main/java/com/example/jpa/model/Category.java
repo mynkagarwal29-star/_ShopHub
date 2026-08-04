@@ -14,7 +14,17 @@ public class Category {
 	private String category;
 	private String image; // This will store the filename
 	public String getImage() {
-		return image;
+	    if (image == null || image.isBlank()) {
+	        return "";
+	    }
+
+	    if (image.startsWith("http")) {
+	        // New Cloudinary image
+	        return image;
+	    }
+
+	    // Old local image
+	    return "/uploads/" + image;
 	}
 	public void setImage(String image) {
 		this.image = image;

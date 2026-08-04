@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 import com.example.jpa.dao.AccDao;
 import com.example.jpa.model.Account;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -15,12 +17,13 @@ public class OtpService {
 
     @Autowired
     private EmailService emailService;
-    @Autowired
-    AccDao ac, accDao;
-    // Stores OTP and expiry for each email
-    private final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
 
-    private static final int OTP_LENGTH = 6;
+    @Autowired
+    private AccDao accDao; // Fixed single reference autowiring
+
+    private final Map<String, OtpData> otpStorage = new ConcurrentHashMap<>();
+    private final SecureRandom secureRandom = new SecureRandom();
+
     private static final int EXPIRY_MINUTES = 5; // OTP valid for 5 minutes
 
     public void generateAndSendOtp(String email) {
@@ -30,8 +33,8 @@ public class OtpService {
             throw new IllegalArgumentException("Email not registered.");
         }
 
-        // Generate a 6-digit random OTP
-        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
+        // Cryptographically secure 6-digit OTP
+        String otp = String.format("%06d", secureRandom.nextInt(1_000_000));
 
         // Store with expiry time
         otpStorage.put(email, new OtpData(otp, LocalDateTime.now().plusMinutes(EXPIRY_MINUTES)));
@@ -44,6 +47,18 @@ public class OtpService {
         emailService.sendSimpleMail(email, subject, message);
     }
 
+    public void generateAndSendSignupOtp(String email) {
+        // Cryptographically secure 6-digit OTP
+        String otp = String.format("%06d", secureRandom.nextInt(1_000_000));
+
+        otpStorage.put(email, new OtpData(otp, LocalDateTime.now().plusMinutes(EXPIRY_MINUTES)));
+
+        String subject = "Your ShopHub Signup Verification OTP";
+        String message = "Dear user,\n\nYour OTP for signup verification is: " + otp +
+                "\n\nThis OTP will expire in " + EXPIRY_MINUTES + " minutes.\n\nWelcome to ShopHub!";
+
+        emailService.sendSimpleMail(email, subject, message);
+    }
 
     public boolean verifyOtp(String email, String otp) {
         if (!otpStorage.containsKey(email)) {
@@ -69,6 +84,10 @@ public class OtpService {
         return isValid;
     }
 
+    public void clearOtp(String email) {
+        otpStorage.remove(email);
+    }
+
     // Inner class to store OTP + expiry
     private static class OtpData {
         private final String otp;
@@ -87,23 +106,4 @@ public class OtpService {
             return expiryTime;
         }
     }
-
-    public void clearOtp(String email) {
-        otpStorage.remove(email); // remove the OTP after successful password reset
-    }
-    
-    
-    public void generateAndSendSignupOtp(String email) {
-        // ✅ Skip the DB check — allow new email
-        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
-
-        otpStorage.put(email, new OtpData(otp, LocalDateTime.now().plusMinutes(EXPIRY_MINUTES)));
-
-        String subject = "Your ShopHub Signup Verification OTP";
-        String message = "Dear user,\n\nYour OTP for signup verification is: " + otp +
-                "\n\nThis OTP will expire in " + EXPIRY_MINUTES + " minutes.\n\nWelcome to ShopHub!";
-
-        emailService.sendSimpleMail(email, subject, message);
-    }
-
 }

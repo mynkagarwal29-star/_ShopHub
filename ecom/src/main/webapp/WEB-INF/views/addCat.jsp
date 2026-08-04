@@ -106,7 +106,7 @@
                             <% if (cat != null && cat.getImage() != null) { %>
                                 <div class="mt-2">
                                     <p>Current Image:</p>
-                                    <img src="/uploads/<%= cat.getImage() %>" width="100" height="100" class="rounded border">
+                                    <img src="<%= cat.getImage() %>" width="100" height="100" class="rounded border">
                                 </div>
                             <% } else { %>
                                 <img id="imagePreview" class="image-preview mt-2 rounded border" alt="Preview" style="display:none;" width="100" height="100">

@@ -25,7 +25,17 @@ public class Product {
 	private double price;
 	
 	public String getImagePath() {
-		return imagePath;
+	    if (imagePath == null || imagePath.isBlank()) {
+	        return "";
+	    }
+
+	    if (imagePath.startsWith("http")) {
+	        // New Cloudinary image
+	        return imagePath;
+	    }
+
+	    // Old local image
+	    return "/uploads/" + imagePath;
 	}
 	public void setImagePath(String imagePath) {
 		this.imagePath = imagePath;

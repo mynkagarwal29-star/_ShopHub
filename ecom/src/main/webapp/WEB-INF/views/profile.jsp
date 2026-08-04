@@ -286,7 +286,7 @@
             %>
                 <div class="order-item mb-3 p-3 border rounded shadow-sm bg-light">
                     <div class="d-flex align-items-center">
-                        <img src="/uploads/<%= firstImage %>" alt="Product" class="me-3"
+                        <img src="<%= firstImage %>" alt="Product" class="me-3"
                              style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
                         <div class="order-details flex-grow-1">
                             <div><strong>Order ID:</strong> #<%= o.getId() %></div>

@@ -208,7 +208,7 @@
                                     for (Category cat : categoryList) { %>
                                         <li class="category-item">
                                             <a href="/select_pd/<%= cat.getCategory() %>" class="category-link">
-                                                <img src="/uploads/<%= cat.getImage() %>" alt="<%= cat.getCategory() %>">
+                                                <img src="<%= cat.getImage() %>" alt="<%= cat.getCategory() %>">
                                                 <h5><%= cat.getCategory() %></h5>
                                             </a>
                                         </li>
@@ -245,7 +245,7 @@
                                 <div class="product-card">
                                     <div class="product-img-container">
                                         <a href="/productdetail/<%= prod.getId() %>">
-                                            <img src="/uploads/<%= prod.getImagePath() %>" 
+                                            <img src="<%= prod.getImagePath() %>" 
                                                  class="product-img img-fluid" alt="<%= prod.getName() %>">
                                         </a>
                                     </div>

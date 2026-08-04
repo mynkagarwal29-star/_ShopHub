@@ -255,14 +255,14 @@
             <!-- Payment and Cart Buttons or Cancel Button -->
             <div class="d-flex justify-content-between align-items-center mt-4">
                
-                    <form action="/api/payment/createRazorpayorder" method="post">
-                        <input type="hidden" name="orderId" value="<%= order.getId() %>">
-                        <input type="hidden" name="amount" value="<%= Math.round(order.getTotal() * 100.0f) / 100.0f %>">
-                        <input type="hidden" name="name" value="<%= order.getAccount().getName() %>">
-                        <input type="hidden" name="email" value="<%= order.getAccount().getEmail() %>">
-                        <input type="hidden" name="contact" value="<%= order.getPhoneNumber() %>">
-                        <button type="submit" class="btn btn-primary">All set! Proceed to Payment</button>
-                    </form>
+              <% if (request.getAttribute("order") != null) { %>
+    <form action="${pageContext.request.contextPath}/api/payment/createRazorpayorder" method="post">
+        <input type="hidden" name="orderId" value="${order.id}" />
+        <button type="submit" class="btn btn-primary">Proceed to Payment</button>
+    </form>
+<% } else { %>
+    <p class="text-danger">Error: Order details could not be loaded.</p>
+<% } %>
                     <a href="/orders/edit?orderId=<%= order.getId() %>" class="btn btn-outline-primary">Want to edit? Go back to Cart</a>
             </div>
 
@@ -318,7 +318,7 @@
                             for (OrderItem item : items) {
                         %>
                             <div class="order-item d-flex mb-3">
-                                <img src="/uploads/<%= item.getProduct().getImagePath() %>" alt="Product" style="width: 80px; height: auto; margin-right: 15px;">
+                                <img src="<%= item.getProduct().getImagePath() %>" alt="Product" style="width: 80px; height: auto; margin-right: 15px;">
                                 <div class="flex-grow-1">
                                     <h5 class="mb-1"><%= item.getProduct().getName() %></h5>
                                     <p class="text-muted mb-1"><%= item.getProduct().getCategory() %></p>

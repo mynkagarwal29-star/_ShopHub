@@ -497,7 +497,7 @@
                                             <div class="product-card">
                                                         <div class="product-img-container">
                                                         	<a href="/productdetail/<%= prod.getId() %>">
-                                                         	  <img src="/uploads/<%= prod.getImagePath() %>" class="product-img" alt="<%= prod.getName() %>">
+                                                         	  <img src="<%= prod.getImagePath() %>" class="product-img" alt="<%= prod.getName() %>">
                                                           	</a>
                                                         </div>
                                                         <div class="product-body">

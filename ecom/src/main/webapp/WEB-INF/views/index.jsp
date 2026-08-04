@@ -67,7 +67,7 @@
                         <div class="category-item me-3">
                             <div class="card category-card text-center">
                                 <a href="/select_pd/<%= cat.getCategory() %>">
-                                    <img src="/uploads/<%= cat.getImage() %>" width="100" height="100" class="mx-auto mt-3">
+                                    <img src="<%= cat.getImage() %>" width="100" height="100" class="mx-auto mt-3">
                                 </a>
                                 <div class="card-body category-card-body">
                                     <h5 class="category-card-title"><%= cat.getCategory() %></h5>
@@ -83,7 +83,7 @@
                         <div class="category-item me-3">
                             <div class="card category-card text-center">
                                 <a href="/select_pd/<%= randomFindsCat.getCategory() %>">
-                                    <img src="/uploads/<%= randomFindsCat.getImage() %>" width="100" height="100" class="mx-auto mt-3">
+                                    <img src="<%= randomFindsCat.getImage() %>" width="100" height="100" class="mx-auto mt-3">
                                 </a>
                                 <div class="card-body category-card-body">
                                     <h5 class="category-card-title"><%= randomFindsCat.getCategory() %></h5>
@@ -113,7 +113,7 @@
                     <div class="product-card">
                         <div class="product-img-container">
                             <a href="/productdetail/<%= prod.getId() %>">
-                                <img src="/uploads/<%= prod.getImagePath() %>" class="product-img" alt="<%= prod.getName() %>">
+                                <img src="<%= prod.getImagePath() %>" class="product-img" alt="<%= prod.getName() %>">
                             </a>
                         </div>
                         <div class="product-body">

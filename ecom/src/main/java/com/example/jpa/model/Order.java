@@ -42,18 +42,58 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items = new ArrayList<>();
     private String phoneNumber;  // <-- store phone as String
-    @Column(name = "razorpay_payment_id")
-    private String razorpayPaymentId;
-    
-    
-    
+	// Add this field to your Order model class:
+	@Column(name = "razorpay_order_id")
+	private String razorpayOrderId;
 
-    public String getRazorpayPaymentId() {
-		return razorpayPaymentId;
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+	    @Column(name = "razorpay_payment_id")
+	    private String razorpayPaymentId;
+
+
+	    public String getRazorpayPaymentId() {
+	        return razorpayPaymentId;
+	    }
+
+	    public void setRazorpayPaymentId(String razorpayPaymentId) {
+	        this.razorpayPaymentId = razorpayPaymentId;
+	    }
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public String getRazorpayOrderId() {
+	    return razorpayOrderId;
 	}
 
-	public void setRazorpayPaymentId(String razorpayPaymentId) {
-		this.razorpayPaymentId = razorpayPaymentId;
+	public void setRazorpayOrderId(String razorpayOrderId) {
+	    this.razorpayOrderId = razorpayOrderId;
 	}
 
 	// getters and setters

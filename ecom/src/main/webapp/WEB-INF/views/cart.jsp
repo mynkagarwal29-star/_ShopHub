@@ -390,7 +390,7 @@ String error = (String) request.getAttribute("error");
                         for (CartItem item : cartItems) {
                 %>
                     <div class="cart-item d-flex align-items-center justify-content-between mb-3 p-2" style="border-bottom:1px solid #eee;">
-                        <img src="/uploads/<%= item.getProduct().getImagePath() %>" class="cart-item-img me-3" style="width:80px; height:80px; object-fit:cover;">
+                        <img src="<%= item.getProduct().getImagePath() %>" class="cart-item-img me-3" style="width:80px; height:80px; object-fit:cover;">
                         <div class="cart-item-details flex-grow-1">
                             <h5 class="cart-item-title mb-1"><%= item.getProduct().getName() %></h5>
                             <div class="cart-item-category mb-1 text-muted"><%= item.getProduct().getCategory() %></div>

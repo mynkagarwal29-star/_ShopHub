@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.jpa.dao.AccDao;
 import com.example.jpa.dao.CartItemDao;
 import com.example.jpa.dao.CatDao;
@@ -41,6 +44,8 @@ public class ProductController {
     @Autowired
     CartItemDao cartItemDao;
     @Autowired
+    private Cloudinary cloudinary;
+    @Autowired
     AccDao ad;
     @Autowired
     OrderItemDao oid;
@@ -53,35 +58,38 @@ public class ProductController {
             return "error";
         }
         try {
-            //Ensure Directory is present as in the upload_dr else make one
-            File dir=new File(Upload_DIR);
-            if(!dir.exists()) {
-                dir.mkdirs();
+
+            if (file.isEmpty()) {
+                model.addFlashAttribute("error", "Please upload a file!");
+                return "redirect:/addForm";
             }
-            
-            //saving the file
-            String fileName=file.getOriginalFilename();
-            if (fileName != null && !fileName.isEmpty()) {
-                Path path = Paths.get(Upload_DIR, fileName);
-                Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                //save the name in db
-                product.setImagePath(fileName);
-            } else {
-                model.addAttribute("error", "Invalid file selected.");
-                return "error"; // error.jsp
-            }
-            //save category to db
+
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "ShopHub/products"
+                        )
+            );
+
+            String imageUrl = (String) uploadResult.get("secure_url");
+
+            // Save Cloudinary URL in DB
+            product.setImagePath(imageUrl);
+
             pd.save(product);
+
             model.addFlashAttribute("msg", "Product was Added Successfully!");
+
             return "redirect:/viewitem";
-        } catch (IOException e) {
-            e.printStackTrace();
-            model.addAttribute("error", "Failed to save file: " + e.getMessage());
-            return "error"; // Redirect to error.jsp or display error page
+
         } catch (Exception e) {
+
             e.printStackTrace();
-            model.addAttribute("error", "Unexpected error occurred: " + e.getMessage());
-            return "error";
+
+            model.addFlashAttribute("error",
+                    "Failed to upload image: " + e.getMessage());
+
+            return "redirect:/addForm";
         }
     }
     
@@ -96,47 +104,64 @@ public class ProductController {
     }
     
     @PostMapping("/updateProduct")
-    public String edited(@ModelAttribute("product") Product product, 
-                         @RequestParam("file") MultipartFile file, 
+    public String edited(@ModelAttribute("product") Product product,
+                         @RequestParam("file") MultipartFile file,
                          RedirectAttributes model) throws IOException {
-        
+
         // Get existing product details
         Product existing = pd.findById(product.getId())
-                             .orElseThrow(() -> new IllegalArgumentException("Invalid product ID:" + product.getId()));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Invalid product ID:" + product.getId()));
+
         // Handle image upload
         if (!file.isEmpty()) {
-            String fileName = file.getOriginalFilename();
-            Path path = Paths.get("uploads/", fileName);
-            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-            product.setImagePath(fileName);
+
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "ShopHub/products"
+                        )
+            );
+
+            String imageUrl = (String) uploadResult.get("secure_url");
+
+            product.setImagePath(imageUrl);
+
         } else {
             // Keep existing image if no new file uploaded
             product.setImagePath(existing.getImagePath());
         }
-        
+
         // Special handling for category updates
-        if ("MISCELLANEOUS".equals(existing.getCategory()) || "RANDOM FINDS".equals(existing.getCategory())) {
+        if ("MISCELLANEOUS".equals(existing.getCategory()) ||
+            "RANDOM FINDS".equals(existing.getCategory())) {
+
             // Validate that the new category exists in the database
             List<Category> categories = cd.findAll();
+
             boolean categoryExists = categories.stream()
-                .anyMatch(cat -> cat.getCategory().equals(product.getCategory()) && 
-                                 !"MISCELLANEOUS".equals(cat.getCategory()));
-            
+                    .anyMatch(cat ->
+                            cat.getCategory().equals(product.getCategory()) &&
+                            !"MISCELLANEOUS".equals(cat.getCategory()));
+
             if (!categoryExists) {
                 model.addFlashAttribute("error", "Invalid category selected!");
                 return "redirect:/editForm?id=" + product.getId();
             }
+
         } else {
             // For non-miscellaneous/random finds products, keep original category
             product.setCategory(existing.getCategory());
         }
-        
+
         // Save updated product
         pd.save(product);
+
         model.addFlashAttribute("msg", "Product was Updated Successfully!");
+
         return "redirect:/viewitem";
-    }    
+    }
+    
+    
     @GetMapping("/viewitem")
     public String getAllData(@RequestParam(value = "category", required = false) String category,
                              @RequestParam(value = "stockSort", required = false) String stockSort,

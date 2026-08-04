@@ -141,7 +141,7 @@
                         <input type="file" class="form-control" id="productImage" name="file" accept="image/*">
                         <% if (product.getImagePath() != null) { %>
                             <p>Current Image:</p>
-                            <img src="/uploads/<%= product.getImagePath() %>" width="150" height="150" class="rounded-3 shadow-sm">
+                            <img src="<%= product.getImagePath() %>" width="150" height="150" class="rounded-3 shadow-sm">
                         <% } %>
                         <img id="imagePreview" class="image-preview" alt="Preview">
                     </div>

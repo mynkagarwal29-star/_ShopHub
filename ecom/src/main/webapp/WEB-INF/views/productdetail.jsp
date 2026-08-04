@@ -812,7 +812,8 @@ if(prod != null) {
 <div class="row">
     <!-- Product Images -->
     <div class="col-lg-5 product-images">
-        <img src="/uploads/<%= prod.getImagePath() %>" class="main-image" id="mainProductImage" alt="<%= prod.getName() %>">
+        <img src="
+        <%= prod.getImagePath() %>" class="main-image" id="mainProductImage" alt="<%= prod.getName() %>">
     </div>
 
     <!-- Product Info -->
@@ -902,7 +903,7 @@ if(prod != null) {
             <div class="col-lg-3 col-md-4 col-sm-6">
                 <div class="card h-100 shadow-sm related-card">
                     <div class="ratio ratio-4x3">
-                        <img src="/uploads/<%= produ.getImagePath() %>"
+                        <img src="<%= produ.getImagePath() %>"
                              class="card-img-top object-fit-cover"
                              alt="<%= produ.getName() %>">
                     </div>
