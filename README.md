@@ -12,7 +12,7 @@ ShopHub is a full-stack e-commerce web application built with **Spring Boot**, *
 
 
 > **⚠️ Note for Demo Users**
->
+> Since Render block emails (25, 587, 435) for its free tier hosting services, account creation is not possible (check the playlist for complete walkthrough)
 > This application is deployed on Render's free tier. If the app has been inactive for a while, the first request may take **30–60 seconds (or longer)** as the service wakes up. Some pages may load more slowly during this initial startup. Once the application is awake, subsequent requests should be much faster.
 ---
 
