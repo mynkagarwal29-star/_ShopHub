@@ -124,115 +124,148 @@
         </div>
     </div>
 
-    <script>
-        // Lottie animation (loader)
-        const loaderAnim = lottie.loadAnimation({
-            container: document.getElementById('lottie-container'),
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            path: 'https://assets7.lottiefiles.com/packages/lf20_j1adxtyb.json'
-        });
+<script>
+    // Lottie animation (loader)
+    const loaderAnim = lottie.loadAnimation({
+        container: document.getElementById('lottie-container'),
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: 'https://assets7.lottiefiles.com/packages/lf20_j1adxtyb.json'
+    });
 
-        const options = {
-            "key": "<%= key != null ? key : "" %>",
-            "amount": <%= amountInPaise %>,
-            "currency": "INR",
-            "name": "ShopHub",
-            "description": "Order Payment #<%= orderId %>",
-            "order_id": "<%= razorpayOrderId != null ? razorpayOrderId : "" %>",
-            "handler": function (response) {
-                // Update text while verifying signature on server
-                document.getElementById('process-text').innerText = "Verifying payment signature...";
+    const options = {
+        key: "<%= key != null ? key : "" %>",
+        amount: <%= amountInPaise %>,
+        currency: "INR",
+        name: "ShopHub",
+        description: "Order Payment #<%= orderId %>",
+        order_id: "<%= razorpayOrderId != null ? razorpayOrderId : "" %>",
 
-                // Send JSON body matching PaymentController @RequestBody Map<String, String>
-                fetch('/api/payment/verify', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify({
-                        'dbOrderId': '<%= orderId %>',
-                        'razorpay_order_id': response.razorpay_order_id,
-                        'razorpay_payment_id': response.razorpay_payment_id,
-                        'razorpay_signature': response.razorpay_signature
-                    })
+        handler: function (response) {
+
+            document.getElementById('process-text').innerText =
+                "Verifying payment signature...";
+
+            fetch('/api/payment/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    dbOrderId: '<%= orderId %>',
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature
                 })
-                .then(res => {
-                    if (res.ok) {
-                        showSuccess();
-                        setTimeout(() => {
-                            window.location.href = "/order/orderconfirm?orderId=" + <%= orderId %>;
-                        }, 1500);
-                    } else {
-                        return res.text().then(text => { throw new Error(text || "Verification failed"); });
-                    }
-                })
-                .catch(err => {
-                    console.error("Verification error:", err);
-                    showFailure(err.message || "Network error verifying payment.");
-                });
-            },
-            "prefill": {
-                "name": "<%= custName != null ? custName : "" %>",
-                "email": "<%= custEmail != null ? custEmail : "" %>",
-                "contact": "<%= custContact != null ? custContact : "" %>"
-            },
-            "theme": { "color": "#007bff" },
-            "modal": {
-                "ondismiss": function() {
-                    console.log("Payment cancelled by user.");
-                    showFailure("Payment was cancelled.");
+            })
+            .then(async (res) => {
 
-                    const params = new URLSearchParams();
-                    params.append('orderId', '<%= orderId %>');
+                const message = await res.text();
 
-                    fetch('/api/payment/failure', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: params.toString()
-                    })
-                    .then(() => {
-                        setTimeout(() => {
-                            window.location.href = "/cart";
-                        }, 1500);
-                    })
-                    .catch(err => {
-                        console.error("Error logging failure:", err);
-                        window.location.href = "/cart";
-                    });
+                if (!res.ok) {
+                    throw new Error(message || "Verification failed");
                 }
+
+                alert(message);
+
+                showSuccess();
+
+                setTimeout(() => {
+                    window.location.href =
+                        "/order/orderconfirm?orderId=<%= orderId %>";
+                }, 1500);
+
+            })
+            .catch(err => {
+                console.error("Verification error:", err);
+                showFailure(err.message || "Network error verifying payment.");
+            });
+
+        },
+
+        prefill: {
+            name: "<%= custName != null ? custName : "" %>",
+            email: "<%= custEmail != null ? custEmail : "" %>",
+            contact: "<%= custContact != null ? custContact : "" %>"
+        },
+
+        theme: {
+            color: "#007bff"
+        },
+
+        modal: {
+            ondismiss: function () {
+
+                console.log("Payment cancelled by user.");
+
+                showFailure("Payment was cancelled.");
+
+                const params = new URLSearchParams();
+                params.append("orderId", "<%= orderId %>");
+
+                fetch("/api/payment/failure", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: params.toString()
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        window.location.href = "/cart";
+                    }, 1500);
+                });
+
             }
-        };
+        }
+    };
 
-        const rzp1 = new Razorpay(options);
+    const rzp1 = new Razorpay(options);
 
-        // Catch client-side execution/card rejection errors
-        rzp1.on('payment.failed', function (response){
-            console.error("Razorpay Error:", response.error);
-            showFailure(response.error.description || "Payment failed.");
-        });
+    // Payment failed at Razorpay
+    rzp1.on("payment.failed", function (response) {
 
-        // Open Razorpay modal on page load
-        window.onload = function() {
-            rzp1.open();
-        };
+        console.error("Razorpay Error:", response.error);
 
-        // UI Helper Functions
-        function showSuccess() {
-            document.getElementById('processing').classList.add('hidden');
-            document.getElementById('failure').classList.add('hidden');
-            document.getElementById('success').classList.remove('hidden');
+        showFailure(response.error.description || "Payment failed.");
+
+        const params = new URLSearchParams();
+        params.append("orderId", "<%= orderId %>");
+
+        fetch("/api/payment/failure", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: params.toString()
+        }).catch(err => console.error(err));
+
+    });
+
+    // Open Razorpay Checkout
+    window.onload = function () {
+        rzp1.open();
+    };
+
+    // Success UI
+    function showSuccess() {
+        document.getElementById("processing").classList.add("hidden");
+        document.getElementById("failure").classList.add("hidden");
+        document.getElementById("success").classList.remove("hidden");
+    }
+
+    // Failure UI
+    function showFailure(reason) {
+
+        if (reason) {
+            document.getElementById("fail-reason").innerText = reason;
         }
 
-        function showFailure(reason) {
-            if (reason) {
-                document.getElementById('fail-reason').innerText = reason;
-            }
-            document.getElementById('processing').classList.add('hidden');
-            document.getElementById('success').classList.add('hidden');
-            document.getElementById('failure').classList.remove('hidden');
-        }
-    </script>
+        document.getElementById("processing").classList.add("hidden");
+        document.getElementById("success").classList.add("hidden");
+        document.getElementById("failure").classList.remove("hidden");
+    }
+</script>
 </body>
 </html>

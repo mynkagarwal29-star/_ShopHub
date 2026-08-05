@@ -102,6 +102,7 @@ public class PaymentController {
         orderService.save(order);
 
         // Send Email Notification
+        /*
         if (order.getAccount() != null && order.getAccount().getEmail() != null) {
             emailService.sendSimpleMail(
                 order.getAccount().getEmail(),
@@ -109,8 +110,35 @@ public class PaymentController {
                 "Thank you for your order! Order #" + order.getId() + " has been successfully placed.\nPayment ID: " + razorpayPaymentId
             );
         }
+        	*/
+     // Send Email Notification
+        boolean emailFailed = false;
+
+        if (order.getAccount() != null && order.getAccount().getEmail() != null) {
+            try {
+                emailService.sendSimpleMail(
+                        order.getAccount().getEmail(),
+                        "Order Confirmation - Order #" + order.getId(),
+                        "Thank you for your order! Order #" + order.getId()
+                                + " has been successfully placed.\nPayment ID: "
+                                + razorpayPaymentId
+                );
+            } catch (Exception e) {
+                emailFailed = true;
+                e.printStackTrace(); // or use logger.error(...)
+            }
+        }
+
+        if (emailFailed) {
+            return ResponseEntity.ok(
+                    "Payment successful. Your order has been confirmed. " +
+                    "The hosted platform is currently unable to send confirmation emails. " +
+                    "Please check your Profile > My Orders to view your order details."
+            );
+        }
 
         return ResponseEntity.ok("Payment verified successfully");
+        
     }
 
     @PostMapping("/failure")
